@@ -5,12 +5,12 @@
  "history_days": 90,
  "history_items_per_theme_day": 12,
  "themes": [
-  {"id": "claims", "label": "Extortion claims", "color": "#ff6b4a"},
-  {"id": "kev", "label": "Exploited vulnerabilities", "color": "#ffb020"},
-  {"id": "cve", "label": "New high/critical CVEs", "color": "#e9e45b"},
-  {"id": "outages", "label": "Outages & service health", "color": "#9db4d6"},
-  {"id": "advisories", "label": "Advisories & news", "color": "#4fc3f7"},
-  {"id": "incidents", "label": "Confirmed U.S. incidents", "color": "#ef4f6a"}
+  {"id": "claims", "label": "Extortion claims", "short": "Extortion claims", "color": "#ff6b4a"},
+  {"id": "kev", "label": "Exploited vulnerabilities", "short": "Exploited vulns", "color": "#ffb020"},
+  {"id": "cve", "label": "New high/critical CVEs", "short": "New CVEs", "color": "#e9e45b"},
+  {"id": "outages", "label": "Outages & service health", "short": "Outages", "color": "#9db4d6"},
+  {"id": "advisories", "label": "Advisories & news", "short": "Advisories & news", "color": "#4fc3f7"},
+  {"id": "incidents", "label": "Confirmed U.S. incidents", "short": "U.S. incidents", "color": "#ef4f6a"}
  ],
  "sources": {
   "ransomwatch": {"enabled": true, "theme": "claims", "url": "https://raw.githubusercontent.com/joshhighet/ransomwatch/main/posts.json",

@@ -23,6 +23,21 @@
   const fmtDay = (ms) => { const d = new Date(ms); return `${MON[d.getMonth()]} ${d.getDate()}`; };
   const SOURCE_KEY = (src) => src.endsWith(" status") ? "statuspages" : ({ ransomwatch: "ransomwatch", "ransomware.live": "ransomware_live", "CISA KEV": "cisa_kev", NVD: "nvd", Upptime: "upptime", INman: "inman" })[src] || "rss";
   const LANE_LABEL = { ransomwatch: "ransomwatch", ransomware_live: "ransomware.live", cisa_kev: "CISA KEV", nvd: "NVD CVEs", statuspages: "Status pages", upptime: "Upptime", rss: "Advisories & news RSS", inman: "INman curated" };
+  const SHORT = { claims: "Extortion claims", kev: "Exploited vulns", cve: "New CVEs", outages: "Outages", advisories: "Advisories & news", incidents: "U.S. incidents" };
+  const shortLabel = (th) => th.short || SHORT[th.id] || th.label;
+  /* text centred on angle `am` along a circle; flipped on the lower half so it never reads upside down */
+  function arcText(c, text, cx, cy, r, am) {
+    const bottom = Math.sin(am) > 0.2, dir = bottom ? -1 : 1;
+    c.textAlign = "center"; c.textBaseline = "middle";
+    let a = am - dir * (c.measureText(text).width / (2 * r));
+    for (const ch of text) {
+      const half = c.measureText(ch).width / (2 * r);
+      a += dir * half;
+      c.save(); c.translate(cx + Math.cos(a) * r, cy + Math.sin(a) * r); c.rotate(a + (bottom ? -Math.PI / 2 : Math.PI / 2));
+      c.fillText(ch, 0, 0); c.restore();
+      a += dir * half;
+    }
+  }
   const colorOf = (id) => (fx.themes[fx.themeIdx.get(id)] || {}).color || "#9db4d6";
   const rangeMs = () => fx.range.days * DAY;
 
@@ -164,7 +179,7 @@
     fx.canvas.style.width = `${W}px`; fx.canvas.style.height = `${H}px`;
     const lanesW = W >= 640 ? 190 : 0;
     fx.geo = { W, H, lanesW, cx: lanesW + (W - lanesW) / 2, cy: H / 2 + 6,
-      R: Math.min((W - lanesW) / 2 - (W >= 640 ? 100 : 20), H / 2 - (W >= 640 ? 44 : 26)) };
+      R: Math.min((W - lanesW) / 2 - (W >= 640 ? 100 : 34), H / 2 - (W >= 640 ? 44 : 38)) };
     draw();
   }
   function sector(id) {
@@ -211,11 +226,21 @@
       const [a0, a1] = sector(th.id), dim = fx.focus && fx.focus !== th.id;
       c.strokeStyle = th.color; c.globalAlpha = dim ? 0.15 : 0.85; c.lineWidth = 4;
       c.beginPath(); c.arc(cx, cy, R * 1.04, a0, a1); c.stroke(); c.globalAlpha = 1;
-      if (!lanesW) continue;
-      const am = (a0 + a1) / 2, lr = R * 1.04 + 16, ax = cx + Math.cos(am) * lr, ly = cy + Math.sin(am) * lr, tw = c.measureText(th.label).width;
+      if (!lanesW) {   // narrow screens: short label curved along its own arc, in the sector's colour
+        c.fillStyle = dim ? "rgba(223,231,245,0.35)" : th.color; c.font = font(600, 11);
+        arcText(c, shortLabel(th), cx, cy, R * 1.04 + 13, (a0 + a1) / 2);
+        c.font = font(600, 11.5);
+        continue;
+      }
+      // straight label with a colour key dot, placed just outside the middle of its arc
+      const am = (a0 + a1) / 2, lr = R * 1.04 + 16, ax = cx + Math.cos(am) * lr, tw = c.measureText(th.label).width + 13;
+      const ly = cy + Math.sin(am) * lr + (Math.abs(Math.sin(am)) > 0.9 ? Math.sign(Math.sin(am)) * 4 : 0);
       const left = Math.cos(am) > 0.25 ? ax : Math.cos(am) < -0.25 ? ax - tw : ax - tw / 2;
-      c.fillStyle = dim ? "rgba(223,231,245,0.35)" : "#dfe7f5"; c.textAlign = "left";
-      c.fillText(th.label, Math.max(lanesW + 4, Math.min(W - tw - 8, left)), ly + (Math.abs(Math.sin(am)) > 0.9 ? Math.sign(Math.sin(am)) * 4 : 0));
+      const x0 = Math.max(lanesW + 4, Math.min(W - tw - 8, left));
+      c.globalAlpha = dim ? 0.35 : 1;
+      c.fillStyle = th.color; c.beginPath(); c.arc(x0 + 4, ly, 4, 0, Math.PI * 2); c.fill();
+      c.fillStyle = "#dfe7f5"; c.textAlign = "left"; c.fillText(th.label, x0 + 13, ly);
+      c.globalAlpha = 1;
     }
 
     c.globalCompositeOperation = "lighter";
