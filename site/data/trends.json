@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-11-22T20:59:23Z",
+ "generated_at": "2026-11-22T21:43:17Z",
  "window": {
   "start": "2026-08-24",
   "end": "2026-11-21",
@@ -12,7 +12,7 @@
   },
   {
    "key": "concentration",
-   "text": "The top 5 groups post 38% of claims and the top 10 post 49%, out of 121 active groups. The Gentlemen and Qilin are the steady leaders (The Gentlemen 100 \u2192 124 \u2192 127, Qilin 102 \u2192 90 \u2192 97)."
+   "text": "The top 5 groups post 36% of claims and the top 10 post 46%, out of 163 active groups. The Gentlemen and Qilin are the steady leaders (The Gentlemen 100 \u2192 124 \u2192 127, Qilin 102 \u2192 90 \u2192 97)."
   },
   {
    "key": "rising",
@@ -20,7 +20,7 @@
   },
   {
    "key": "churn",
-   "text": "6 groups posted only in the last 30 days (Vortex, Pixelleaks and Soul); Storm, killsec3 and Clop went quiet."
+   "text": "6 groups posted only in the last 30 days (Vortex, Pixelleaks and Soul); Storm, killsec3 and Zawoo went quiet."
   },
   {
    "key": "rhythm",
@@ -29,6 +29,10 @@
   {
    "key": "vulns",
    "text": "CISA added about 9 exploited vulnerabilities a week (steady); new high and critical CVEs ran about 112 a week (slowing)."
+  },
+  {
+   "key": "epss",
+   "text": "At least 15 new high and critical CVEs (1.1%) have a 10% or higher chance of being exploited within 30 days, by FIRST's EPSS score. Highest now: CVE-2026-109618 (100%, on CISA list), CVE-2026-109619 (100%, on CISA list), CVE-2026-111497 (100%, on CISA list)."
   },
   {
    "key": "sectors",
@@ -132,9 +136,9 @@
    "Saturday": 24.3,
    "Sunday": 21.5
   },
-  "top5_share": 38,
-  "top10_share": 49,
-  "groups_active": 121,
+  "top5_share": 36,
+  "top10_share": 46,
+  "groups_active": 163,
   "steady": [
    {
     "name": "The Gentlemen",
@@ -251,6 +255,28 @@
     "attack_url": null
    },
    {
+    "name": "Qilin",
+    "periods": [
+     0,
+     0,
+     23
+    ],
+    "total": 23,
+    "attack_id": "S1242",
+    "attack_url": "https://attack.mitre.org/software/S1242"
+   },
+   {
+    "name": "Vortex",
+    "periods": [
+     0,
+     0,
+     22
+    ],
+    "total": 22,
+    "attack_id": null,
+    "attack_url": null
+   },
+   {
     "name": "Climax",
     "periods": [
      0,
@@ -258,28 +284,6 @@
      19
     ],
     "total": 19,
-    "attack_id": null,
-    "attack_url": null
-   },
-   {
-    "name": "Curious worm",
-    "periods": [
-     0,
-     0,
-     16
-    ],
-    "total": 16,
-    "attack_id": null,
-    "attack_url": null
-   },
-   {
-    "name": "Aoqin leaks",
-    "periods": [
-     0,
-     0,
-     15
-    ],
-    "total": 15,
     "attack_id": null,
     "attack_url": null
    }
@@ -308,17 +312,6 @@
     "attack_url": null
    },
    {
-    "name": "Clop",
-    "periods": [
-     2,
-     24,
-     0
-    ],
-    "total": 26,
-    "attack_id": "S0611",
-    "attack_url": "https://attack.mitre.org/software/S0611"
-   },
-   {
     "name": "Zawoo",
     "periods": [
      22,
@@ -328,6 +321,17 @@
     "total": 26,
     "attack_id": null,
     "attack_url": null
+   },
+   {
+    "name": "Clop",
+    "periods": [
+     2,
+     24,
+     0
+    ],
+    "total": 26,
+    "attack_id": "S0611",
+    "attack_url": "https://attack.mitre.org/software/S0611"
    },
    {
     "name": "ShinyHunters",
@@ -383,6 +387,61 @@
     67,
     90,
     138
+   ]
+  },
+  "epss": {
+   "threshold": 0.1,
+   "likely": 15,
+   "share_pct": 1.1,
+   "top": [
+    {
+     "cve": "CVE-2026-109618",
+     "epss": 0.99999,
+     "pct": 1.0,
+     "url": "https://nvd.nist.gov/vuln/detail/CVE-2026-109618",
+     "kev": true,
+     "title": "CVE-2026-109618 \u00b7 PHP Group PHP: PHP Memory Corruption Vulnerability"
+    },
+    {
+     "cve": "CVE-2026-109619",
+     "epss": 0.99999,
+     "pct": 1.0,
+     "url": "https://nvd.nist.gov/vuln/detail/CVE-2026-109619",
+     "kev": true,
+     "title": "CVE-2026-109619 \u00b7 PHP Group PHP: PHP Stale Internal Request-State Vulnerability"
+    },
+    {
+     "cve": "CVE-2026-111497",
+     "epss": 0.99931,
+     "pct": 0.9997,
+     "url": "https://nvd.nist.gov/vuln/detail/CVE-2026-111497",
+     "kev": true,
+     "title": "CVE-2026-111497 \u00b7 Google Brotli: Google Brotli Unchecked Return Value Vulnerability"
+    },
+    {
+     "cve": "CVE-2026-123158",
+     "epss": 0.95538,
+     "pct": 0.9987,
+     "url": "https://nvd.nist.gov/vuln/detail/CVE-2026-123158",
+     "kev": true,
+     "title": "CVE-2026-123158 \u00b7 OpenBSD OpenSSH: OpenBSD OpenSSH Unexpected Status Code or Return Value Vulnerability"
+    },
+    {
+     "cve": "CVE-2026-48356",
+     "epss": 0.81624,
+     "pct": 0.9965,
+     "url": "https://nvd.nist.gov/vuln/detail/CVE-2026-48356",
+     "kev": true,
+     "title": "CVE-2026-48356 \u00b7 Adobe Commerce and Magento: Adobe Commerce and Magento Unrestricted Upload of File with Dangerous Type Vulnerability"
+    },
+    {
+     "cve": "CVE-2026-40217",
+     "epss": 0.78004,
+     "pct": 0.9958,
+     "url": "https://nvd.nist.gov/vuln/detail/CVE-2026-40217",
+     "kev": true,
+     "title": "CVE-2026-40217 \u00b7 BerriAI LiteLLM: BerriAI LiteLLM Unprotected Alternate Channel Vulnerability"
+    }
    ]
   }
  },
