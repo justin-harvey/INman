@@ -1,7 +1,9 @@
 {
  "_how_to": "Sources feeding the live orb. Each theme is one sector of the orb. Turn a source off with \"enabled\": false. Every source here is public; check the terms note before adding new ones.",
  "window_days": 7,
- "max_items": 2000,
+ "max_items": 4000,
+ "history_days": 90,
+ "history_items_per_theme_day": 12,
  "themes": [
   {"id": "claims", "label": "Extortion claims", "color": "#ff6b4a"},
   {"id": "kev", "label": "Exploited vulnerabilities", "color": "#ffb020"},

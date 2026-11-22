@@ -24,10 +24,18 @@
     <div class="flow-head">
       <div>
         <h2>Live threat flow</h2>
-        <p>Everything the feeds brought in over the past week. New items stream in from their source and land at the rim; older items sink toward the core. Each sector is one theme.</p>
+        <p>Items from every source, one sector per theme. The rim is now; the core is the start of the range. Replay a range to watch items stream in from their source and sink toward the core as time passes.</p>
       </div>
-      <div class="flow-actions"><span id="flowUpdated"></span><button id="flowReplay" type="button">Replay last 48h</button></div>
+      <div class="flow-actions"><span id="flowUpdated"></span></div>
     </div>
+    <div class="flow-controls">
+      <div class="ranges" id="flowRanges" role="group" aria-label="Replay range"></div>
+      <button id="flowPlay" type="button">Replay</button>
+      <input id="flowScrub" type="range" min="0" max="1000" value="1000" aria-label="Position in the replay range">
+      <span id="flowClock" class="clock live" aria-live="off">Live</span>
+      <button id="flowLive" type="button" class="hidden">Back to live</button>
+    </div>
+    <p id="flowCoverage" class="flow-coverage"></p>
     <div class="flow-body">
       <div class="orb-wrap"><canvas id="orb" role="img" aria-label="Orb of incoming threat items by theme"></canvas></div>
       <aside class="ticker"><h3>Latest inflow</h3><ul id="flowTicker"></ul></aside>

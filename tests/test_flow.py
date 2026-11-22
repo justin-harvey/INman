@@ -52,6 +52,7 @@ class FlowTests(unittest.TestCase):
         self.put(src["cisa_kev"]["url"], {"vulnerabilities": [
             {"cveID": "CVE-2026-0001", "vendorProject": "Acme", "product": "Gateway", "vulnerabilityName": "Auth bypass",
              "dateAdded": day(1), "knownRansomwareCampaignUse": "Known"},
+            {"cveID": "CVE-2026-0020", "vendorProject": "Acme", "product": "VPN", "vulnerabilityName": "RCE", "dateAdded": day(20)},
             {"cveID": "CVE-2019-0001", "vendorProject": "Old", "product": "Thing", "vulnerabilityName": "x", "dateAdded": "2019-01-01"}]})
         self.put("https://services.nvd.nist.gov/rest/json/cves/2.0", {"vulnerabilities": [
             {"cve": {"id": "CVE-2026-1111", "published": ago(5).rstrip("Z") + ".000",
@@ -92,6 +93,33 @@ class FlowTests(unittest.TestCase):
         self.assertTrue(doc["sources"]["rss"].startswith("ok"))
         themes = {t["id"] for t in doc["themes"]}
         self.assertTrue(all(it["theme"] in themes for it in doc["items"]))
+
+    def test_history_window_and_counts(self):
+        live = self.run_flow()
+        with open(os.path.join(self.tmp, "site", "data", "flow_history.json")) as f:
+            hist = json.load(f)
+        live_ids = {i["id"] for i in live["items"]}
+        hist_titles = [i["title"] for i in hist["items"]]
+        self.assertTrue(any("CVE-2026-0020" in t for t in hist_titles))          # 20 days old: history only
+        self.assertFalse(any("CVE-2026-0020" in i["title"] for i in live["items"]))
+        self.assertTrue(live_ids <= {i["id"] for i in hist["items"]} | live_ids)
+        self.assertEqual(sum(hist["daily"]["kev"].values()), 2)
+        self.assertFalse(any("CVE-2019-0001" in t for t in hist_titles))         # outside 90 days
+        # the curated incidents give real history for every day they cover, capped per theme per day
+        per = {}
+        for i in hist["items"]:
+            per[(i["theme"], i["ts"][:10])] = per.get((i["theme"], i["ts"][:10]), 0) + 1
+        self.assertLessEqual(max(per.values()), hist["items_per_theme_day"])
+
+    def test_history_counts_never_drop_when_feed_rolls_off(self):
+        self.run_flow()
+        rss_url = self.conf["sources"]["rss"]["feeds"]["The Record"]
+        self.put(rss_url, '<?xml version="1.0"?><feed xmlns="http://www.w3.org/2005/Atom"></feed>')
+        self.flow.NOW = self.flow.NOW + dt.timedelta(minutes=30)
+        self.run_flow()
+        with open(os.path.join(self.tmp, "site", "data", "flow_history.json")) as f:
+            hist = json.load(f)
+        self.assertTrue(any(i["source"] == "The Record" for i in hist["items"]))  # carried forward
 
     def test_first_seen_is_kept_between_runs(self):
         first = {i["id"]: i["first_seen"] for i in self.run_flow()["items"]}

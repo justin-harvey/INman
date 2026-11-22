@@ -1,8 +1,12 @@
 """Build site/data/flow.json: the live inflow behind the orb.
 
 Each source becomes items {id, ts, first_seen, theme, source, title, severity, url}.
-Items persist across runs (merged with the previous flow.json) for `window_days`,
-so short feeds such as RSS still leave a week of history.
+Two outputs:
+  site/data/flow.json          every item from the last `window_days` (default 7); polled by the page
+  site/data/flow_history.json  `history_days` (default 90): true daily counts per theme, plus the
+                               most severe `history_items_per_theme_day` items per theme per day
+Items persist across runs, so feeds that only return recent items (RSS, status pages, NVD)
+still build up a full history. NVD is backfilled for the whole window on the first run.
 
 Sources and themes are configured in data/flow_sources.json.
 Environment: RL_ENABLED, RL_API_BASE, RL_API_KEY, RL_API_KEY_HEADER (see README),
@@ -23,6 +27,7 @@ ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 CONFIG = os.path.join(ROOT, "data", "flow_sources.json")
 OUT = os.path.join(ROOT, "site", "data", "flow.json")
 INCIDENTS = os.path.join(ROOT, "site", "data", "incidents.json")
+HISTORY = os.path.join(ROOT, "site", "data", "flow_history.json")
 UA = "inman-incident-monitor/1.0 (+private team dashboard)"
 NOW = dt.datetime.now(dt.timezone.utc).replace(microsecond=0)
 
@@ -127,28 +132,43 @@ def a_cisa_kev(cfg, since):
     return out
 
 
+NVD_STATE = {"backfill": False}   # set by main(): True until the history holds older NVD items
+
+
 def a_nvd(cfg, since):
+    """Last 7 days each run; the full history window (paged, rate-limit aware) until backfilled."""
+    import time
     headers = {"apiKey": env("NVD_API_KEY")} if env("NVD_API_KEY") else {}
-    start = max(since, NOW - dt.timedelta(days=7))
+    start = since if NVD_STATE["backfill"] else max(since, NOW - dt.timedelta(days=7))
+    pause = 0 if env("FIXTURE_DIR") else (0.7 if headers else 6.5)   # NVD: 5 req/30s without a key, 50 with
     fmt = lambda d: d.strftime("%Y-%m-%dT%H:%M:%S.000+00:00")
-    out = []
+    out, calls = [], 0
     for sev in cfg.get("severities", ["CRITICAL", "HIGH"]):
-        q = urllib.parse.urlencode({"pubStartDate": fmt(start), "pubEndDate": fmt(NOW), "cvssV3Severity": sev,
-                                    "resultsPerPage": 2000})
-        data = json.loads(fetch(f"https://services.nvd.nist.gov/rest/json/cves/2.0?{q}", headers))
-        for v in data.get("vulnerabilities", []):
-            c = v.get("cve", {})
-            score = None
-            for key in ("cvssMetricV31", "cvssMetricV30", "cvssMetricV40"):
-                m = c.get("metrics", {}).get(key)
-                if m:
-                    score = m[0].get("cvssData", {}).get("baseScore")
-                    break
-            desc = next((d["value"] for d in c.get("descriptions", []) if d.get("lang") == "en"), "")
-            t = parse_time(c.get("published"))
-            if t:
-                out.append(item("NVD", cfg["theme"], c.get("id"), t, f"{c.get('id')} ({score or sev}): {desc}",
-                                (score or 7) / 10, f"https://nvd.nist.gov/vuln/detail/{c.get('id')}"))
+        index = 0
+        while True:
+            if calls:
+                time.sleep(pause)
+            q = urllib.parse.urlencode({"pubStartDate": fmt(start), "pubEndDate": fmt(NOW), "cvssV3Severity": sev,
+                                        "resultsPerPage": 2000, "startIndex": index})
+            data = json.loads(fetch(f"https://services.nvd.nist.gov/rest/json/cves/2.0?{q}", headers))
+            calls += 1
+            vulns = data.get("vulnerabilities", [])
+            for v in vulns:
+                c = v.get("cve", {})
+                score = None
+                for key in ("cvssMetricV31", "cvssMetricV30", "cvssMetricV40"):
+                    m = c.get("metrics", {}).get(key)
+                    if m:
+                        score = m[0].get("cvssData", {}).get("baseScore")
+                        break
+                desc = next((d["value"] for d in c.get("descriptions", []) if d.get("lang") == "en"), "")
+                t = parse_time(c.get("published"))
+                if t:
+                    out.append(item("NVD", cfg["theme"], c.get("id"), t, f"{c.get('id')} ({score or sev}): {desc}",
+                                    (score or 7) / 10, f"https://nvd.nist.gov/vuln/detail/{c.get('id')}"))
+            index += len(vulns)
+            if not vulns or index >= int(data.get("totalResults", 0)) or calls >= 20:
+                break
     return out
 
 
@@ -234,50 +254,93 @@ ADAPTERS = {"ransomwatch": a_ransomwatch, "ransomware_live": a_ransomware_live, 
             "nvd": a_nvd, "statuspages": a_statuspages, "upptime": a_upptime, "rss": a_rss, "inman": a_inman}
 
 
+def day_of(it):
+    return it["ts"][:10]
+
+
 def main():
     with open(CONFIG) as f:
         conf = json.load(f)
-    since = NOW - dt.timedelta(days=int(conf.get("window_days", 7)))
-    previous = {}
-    if os.path.exists(OUT):
-        with open(OUT) as f:
-            previous = {i["id"]: i for i in json.load(f).get("items", [])}
+    live_days = int(conf.get("window_days", 7))
+    hist_days = int(conf.get("history_days", 90))
+    per_day = int(conf.get("history_items_per_theme_day", 12))
+    live_since = NOW - dt.timedelta(days=live_days)
+    hist_since = NOW - dt.timedelta(days=hist_days)
 
-    items, status = {}, {}
+    def load(path):
+        if os.path.exists(path):
+            with open(path) as f:
+                return json.load(f)
+        return {}
+
+    prev_live = {i["id"]: i for i in load(OUT).get("items", [])}
+    prev_hist = load(HISTORY)
+    prev_items = {i["id"]: i for i in prev_hist.get("items", [])}
+    prev_items.update(prev_live)
+    NVD_STATE["backfill"] = not any(i["source"] == "NVD" and parse_time(i["ts"]) < NOW - dt.timedelta(days=8)
+                                    for i in prev_items.values())
+
+    fetched, status = {}, {}
     for name, cfg in conf["sources"].items():
         if not enabled(cfg):
             status[name] = "off"
             continue
         try:
-            got = ADAPTERS[name](cfg, since)
+            got = ADAPTERS[name](cfg, hist_since)
             for it in got:
-                if it["id"] in previous:          # keep when we first saw it, so the orb animates only new items
-                    it["first_seen"] = previous[it["id"]]["first_seen"]
-                items[it["id"]] = it
+                if it["id"] in prev_items:      # keep when we first saw it, so the orb animates only new items
+                    it["first_seen"] = prev_items[it["id"]]["first_seen"]
+                fetched[it["id"]] = it
             status[name] = f"ok ({len(got)})"
         except Exception as e:
             status[name] = f"error: {e.__class__.__name__}: {str(e)[:120]}"
 
-    # carry forward items still in the window that this run did not return (e.g. aged out of an RSS feed)
-    failed_or_rolling = {k for k, v in status.items() if not v.startswith("ok")} | {"rss", "statuspages"}
-    source_of = {"ransomwatch": "ransomwatch", "ransomware.live": "ransomware_live", "CISA KEV": "cisa_kev", "NVD": "nvd",
-                 "Upptime": "upptime", "INman": "inman"}
-    for pid, it in previous.items():
-        src = source_of.get(it["source"], "statuspages" if it["source"].endswith(" status") else "rss")
-        if pid not in items and src in failed_or_rolling and src in status and status[src] != "off" \
-                and parse_time(it["ts"]) >= since:
-            items[pid] = it
+    # everything known this run: fresh items + earlier ones still inside the history window
+    # (RSS, status pages and NVD only return recent items, so older ones are carried forward)
+    known = dict(fetched)
+    for pid, it in prev_items.items():
+        if pid not in known and parse_time(it["ts"]) >= hist_since:
+            known[pid] = it
 
-    ordered = sorted(items.values(), key=lambda i: i["ts"], reverse=True)[: int(conf.get("max_items", 2000))]
-    doc = {"generated_at": iso(NOW), "window_days": conf.get("window_days", 7), "themes": conf["themes"],
-           "sources": status, "items": ordered}
+    # live file: every item from the last `window_days`
+    live = sorted((i for i in known.values() if parse_time(i["ts"]) >= live_since), key=lambda i: i["ts"], reverse=True)
+    live = live[: int(conf.get("max_items", 2000))]
+
+    # history file: true daily counts per theme + the most severe items per theme per day
+    counts = {}
+    for it in list(fetched.values()) + list(prev_live.values()):
+        if parse_time(it["ts"]) >= hist_since:
+            counts.setdefault(it["theme"], {}).setdefault(day_of(it), set()).add(it["id"])
+    daily = {}
+    first_day = hist_since.date().isoformat()
+    for th in conf["themes"]:
+        old = prev_hist.get("daily", {}).get(th["id"], {})
+        new = {d: len(ids) for d, ids in counts.get(th["id"], {}).items()}
+        merged = {d: max(old.get(d, 0), new.get(d, 0)) for d in set(old) | set(new) if d >= first_day}
+        daily[th["id"]] = dict(sorted(merged.items()))
+    buckets = {}
+    for it in known.values():
+        buckets.setdefault((it["theme"], day_of(it)), []).append(it)
+    hist_items = []
+    for group in buckets.values():
+        group.sort(key=lambda i: (i["severity"], i["ts"]), reverse=True)
+        hist_items.extend(group[:per_day])
+    hist_items.sort(key=lambda i: i["ts"], reverse=True)
+
     os.makedirs(os.path.dirname(OUT), exist_ok=True)
-    with open(OUT, "w", encoding="utf-8") as f:
-        json.dump(doc, f, indent=0, ensure_ascii=False)
-        f.write("\n")
+    write(OUT, {"generated_at": iso(NOW), "window_days": live_days, "history_days": hist_days,
+                "themes": conf["themes"], "sources": status, "items": live})
+    write(HISTORY, {"generated_at": iso(NOW), "history_days": hist_days, "items_per_theme_day": per_day,
+                    "themes": conf["themes"], "daily": daily, "items": hist_items})
     for k, v in status.items():
         print(f"{k}: {v}")
-    print(f"flow items: {len(ordered)}")
+    print(f"live items: {len(live)} · history items: {len(hist_items)}")
+
+
+def write(path, doc):
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump(doc, f, separators=(",", ":"), ensure_ascii=False)
+        f.write("\n")
 
 
 if __name__ == "__main__":

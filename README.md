@@ -32,6 +32,7 @@ site/                 the dashboard (Netlify publishes this folder)
   data/context.json   global leak-site posts per day (written by ingest)
   data/meta.json      last update time + feed status (written by ingest)
   data/flow.json      last week of live items for the orb (written by flow.py)
+  data/flow_history.json  90 days: daily counts + top items per theme per day
   flow.js             the orb
 scripts/
   ingest.py           pulls feeds, dedupes, applies overrides
@@ -71,9 +72,14 @@ The adapter calls `/countryvictims/US` and keeps claims from the last 30 days (`
 
 ## Live threat flow (the orb)
 
-The top of the dashboard is an orb of everything the feeds brought in over the past week. Each sector is one theme. New items stream in from their source lane and land at the rim; items sink toward the core as they age. Click a theme card to focus it, hover a point for details, click it to open the source. The page re-checks `data/flow.json` every 5 minutes and animates anything new.
+The top of the dashboard is an orb of everything the feeds brought in. Each sector is one theme. The rim is "now" and the core is the start of the chosen range: **48 hours, 1 week, 30 days, 60 days or 90 days**. Pick a range and the orb replays it on a clock: items stream in from their source lane, land at the rim and sink toward the core as time passes. Drag the slider to any moment, pause, or jump back to live. Click a theme card to focus it, hover a point for details, click it to open the source. In live mode the page re-checks `data/flow.json` every 5 minutes and animates anything new.
 
-`scripts/flow.py` builds `site/data/flow.json` on the same 30-minute schedule. Sources and themes live in `data/flow_sources.json`; turn any source off with `"enabled": false`.
+`scripts/flow.py` runs on the same 30-minute schedule and writes two files:
+
+- `site/data/flow.json`: every item from the last 7 days (48-hour and 1-week views, live polling).
+- `site/data/flow_history.json`: 90 days of exact daily counts per theme, plus the 12 most severe items per theme per day (30/60/90-day views; loaded only when picked). Change `history_days` and `history_items_per_theme_day` in `data/flow_sources.json`.
+
+History builds up from the first scheduled run for feeds that only publish recent items (RSS, status pages). ransomwatch, CISA KEV and the curated incidents fill the full 90 days at once, and NVD is backfilled for the whole window on the first run (slowly, to respect its rate limit; add `NVD_API_KEY` to speed it up). Sources and themes live in `data/flow_sources.json`; turn any source off with `"enabled": false`.
 
 | Theme | Sources (default) | Terms |
 | --- | --- | --- |
@@ -84,7 +90,7 @@ The top of the dashboard is an orb of everything the feeds brought in over the p
 | Advisories & news | CISA advisories, BleepingComputer and The Record RSS (headlines and links only) | Headlines only |
 | Confirmed U.S. incidents | This repo's curated incidents (claims and outages go to their own sectors) | — |
 
-Items persist for `window_days` (default 7) even after they drop out of a short feed such as RSS. A source that fails is shown as such on the dashboard and does not erase the others.
+Items persist even after they drop out of a short feed such as RSS. A source that fails is shown as such on the dashboard and does not erase the others.
 
 ## Analyst workflow
 
