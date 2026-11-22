@@ -40,10 +40,12 @@ scripts/
   ingest.py           pulls feeds, dedupes, applies overrides
   flow.py             builds the orb's live flow from data/flow_sources.json
   trends.py           recomputes the Trends card from the history and incidents
+  official.py         SEC EDGAR and HHS breach-portal adapters (called by ingest.py)
   xlsx_to_json.py     converts the analyst workbook into incidents.json
   check_data.py       Netlify build gate: refuses malformed data
   schema.py           shared field list, tiers, validation
 data/overrides.json   analyst corrections and tier promotions
+data/epss_cache.json  today's EPSS scores, so each CVE is looked up once a day
 data/flow_sources.json  orb themes and sources
 tests/                offline tests (run in CI before every ingest)
 .github/workflows/ingest.yml   runs every 30 minutes
@@ -64,6 +66,15 @@ The workflow runs every 30 minutes (GitHub can delay scheduled runs at busy time
 | --- | --- | --- |
 | Global leak-site posts (context line) | On | Counts global leak-site posts per day from RansomLook (CC BY 4.0), falling back to ransomwatch. These posts carry no country, so they never become U.S. incidents. meta.json flags the line as `stale` if the newest post is over 7 days old. |
 | ransomware.live | **Off** | Adds U.S. leak-site claims as Tier 2. |
+| SEC EDGAR 8-K filings | On | Public companies' cybersecurity disclosures: Item 1.05 (material) and voluntary Item 8.01 filings from the last 60 days, found with EDGAR full-text search. Item 8.01 filings count only when the filing reads like an incident notice. Tier 1. |
+| HHS breach portal | On | Hacking/IT breaches of health information affecting 500+ people, reported to HHS's Office for Civil Rights in the last 60 days. Read every 6 hours (`HHS_EVERY_HOURS`) and on every manual run, since the portal changes slowly. Counts of 500 or 501 are placeholders filed while an investigation runs, so they stay out of record totals. Tier 1. |
+| FIRST EPSS | On | Scores each new CVE and CISA exploited-list entry with its estimated chance of exploitation in the next 30 days. Scores of 10% or more raise the item's prominence on the orb and feed the Trends card. Looked up once a day per CVE (`data/epss_cache.json`). |
+
+**Official records confirm what's already listed.** When an SEC filing or HHS report names an organization already in the data within 120 days, it doesn't add a duplicate. It records the filing in `confirmed_by` and, if the entry was a Tier 2 claim or Tier 3 suspected outage, promotes it to Tier 1.
+
+**SEC asks automated clients to identify themselves.** Set the variable `SEC_USER_AGENT` to your organization name and a contact email, for example `Acme Security Team secops@acme.example`. Without it the job sends a generic name; if SEC refuses that (HTTP 403), the feed status on the dashboard says so. Turn either official feed off with the variable `SEC_ENABLED` or `HHS_ENABLED` = `false`, or `EPSS_ENABLED` = `false` for the scores. All three are public data: SEC filings and HHS reports are U.S. government records, and FIRST publishes EPSS free of charge and asks for attribution, which the dashboard shows.
+
+**The HHS portal has no API.** The adapter reads the portal's web table the way a browser does (session, view state, 100-row pages). If HHS changes the page, the status line reports how many rows it could read, and the rest of the run carries on.
 
 **Licensing gate for ransomware.live.** Its terms allow free non-commercial use with attribution. Commercial use needs written approval from its owner, and the terms also bar republishing raw data and dashboards that copy its look. Get approval (or confirm your use is non-commercial) before enabling it. Then set, under **Settings → Secrets and variables → Actions**:
 
@@ -88,10 +99,10 @@ History builds up from the first scheduled run for feeds that only publish recen
 | --- | --- | --- |
 | Extortion claims | RansomLook (global, on); ransomwatch (off: its feed stopped updating; re-enable if it resumes); ransomware.live (U.S., off until licensing is cleared) | RansomLook: CC BY 4.0, credit shown on the dashboard. ransomwatch: Unlicense. ransomware.live: terms above |
 | Exploited vulnerabilities | CISA Known Exploited Vulnerabilities feed | U.S. government public data |
-| New high/critical CVEs | NVD CVE API 2.0 (optional secret `NVD_API_KEY` raises the rate limit) | Public API. Show NVD's notice: "This product uses the NVD API but is not endorsed or certified by the NVD." |
+| New high/critical CVEs | NVD CVE API 2.0 (optional secret `NVD_API_KEY` raises the rate limit), scored with FIRST EPSS | Public API. Show NVD's notice: "This product uses the NVD API but is not endorsed or certified by the NVD." EPSS: free, attribution requested |
 | Outages & service health | Public Statuspage pages (GitHub, Cloudflare, Atlassian, Twilio, Zoom); the built-in **site watchlist** (`data/watchlist.json`, empty until you add sites); optionally your own Upptime repo (off) | Public status pages |
 | Advisories & news | CISA advisories, BleepingComputer and The Record RSS (headlines and links only) | Headlines only |
-| Confirmed U.S. incidents | This repo's curated incidents (claims and outages go to their own sectors) | — |
+| Confirmed U.S. incidents | This repo's curated incidents plus SEC 8-K and HHS breach-portal records (claims and outages go to their own sectors) | U.S. government public records |
 
 **Corroborated claims.** When the same victim appears on more than one tracker within 4 days, the claims merge into one point with a white ring, a "seen on" list and a higher severity. Ransomware groups do post false claims, so a second tracker is a useful (not conclusive) signal.
 

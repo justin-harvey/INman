@@ -22,7 +22,7 @@
   const fmtClock = (ms) => { const d = new Date(ms); return `${MON[d.getMonth()]} ${d.getDate()}, ${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`; };
   const fmtDay = (ms) => { const d = new Date(ms); return `${MON[d.getMonth()]} ${d.getDate()}`; };
   const SOURCE_KEY = (src) => src.endsWith(" status") ? "statuspages" : ({ ransomwatch: "ransomwatch", RansomLook: "ransomlook", Watchlist: "watchlist", "ransomware.live": "ransomware_live", "CISA KEV": "cisa_kev", NVD: "nvd", Upptime: "upptime", INman: "inman" })[src] || "rss";
-  const LANE_LABEL = { ransomlook: "RansomLook", watchlist: "Site watchlist", ransomwatch: "ransomwatch", ransomware_live: "ransomware.live", cisa_kev: "CISA KEV", nvd: "NVD CVEs", statuspages: "Status pages", upptime: "Upptime", rss: "Advisories & news RSS", inman: "INman curated" };
+  const LANE_LABEL = { epss: "EPSS scores", ransomlook: "RansomLook", watchlist: "Site watchlist", ransomwatch: "ransomwatch", ransomware_live: "ransomware.live", cisa_kev: "CISA KEV", nvd: "NVD CVEs", statuspages: "Status pages", upptime: "Upptime", rss: "Advisories & news RSS", inman: "INman curated" };
   const SHORT = { claims: "Extortion claims", kev: "Exploited vulns", cve: "New CVEs", outages: "Outages", advisories: "Advisories & news", incidents: "U.S. incidents" };
   const shortLabel = (th) => th.short || SHORT[th.id] || th.label;
   /* text centred on angle `am` along a circle; flipped on the lower half so it never reads upside down */
@@ -357,7 +357,8 @@
   function renderSources() {
     const d = fx.live;
     $("flowUpdated").textContent = d.generated_at ? `Feeds checked ${ago(Date.now() - Date.parse(d.generated_at))}` : "";
-    $("flowSourceList").textContent = Object.entries(d.sources || {}).map(([k, v]) => `${LANE_LABEL[k] || k}: ${v}`).join(" · ");
+    $("flowSourceList").textContent = Object.entries({ ...(d.sources || {}), ...(d.enrichment || {}) })
+      .map(([k, v]) => `${LANE_LABEL[k] || k}: ${v}`).join(" · ");
   }
 
   function coverageNote() {
@@ -388,6 +389,7 @@
     showTip(ev, [h("b", { text: th ? th.label : p.it.theme }), h("div", { text: p.it.title }),
       p.it.seen_on ? h("div", { class: "orgs", text: `Seen on ${p.it.seen_on.length} trackers: ${p.it.seen_on.join(", ")}` }) : null,
       att ? h("div", { class: "orgs", text: `MITRE ATT&CK: ${att.name} (${att.id})` }) : null,
+      typeof p.it.epss === "number" ? h("div", { class: "orgs", text: `EPSS: ${(p.it.epss * 100).toFixed(p.it.epss < 0.1 ? 1 : 0)}% chance of exploitation in the next 30 days (higher than ${Math.round((p.it.epss_pct || 0) * 100)}% of CVEs)` }) : null,
       h("div", { class: "orgs", text: `${p.it.seen_on ? "First seen on " : ""}${p.it.source} · ${fmtClock(p.it._t)}` })].filter(Boolean));
   }
   function click(ev) {

@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-11-22T18:24:39Z",
+ "generated_at": "2026-11-22T20:59:23Z",
  "window": {
   "start": "2026-08-24",
   "end": "2026-11-21",
@@ -438,6 +438,11 @@
   },
   "ops_disrupted_pct": 52,
   "actor_unnamed_pct": 75,
+  "official": {
+   "sec": 0,
+   "hhs": 0,
+   "confirmed_existing": 0
+  },
   "records_total": 37571361,
   "records_top3_pct": 52
  },

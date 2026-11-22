@@ -34,6 +34,9 @@ jobs:
           RL_API_BASE: ${{ vars.RL_API_BASE }}
           RL_API_KEY_HEADER: ${{ vars.RL_API_KEY_HEADER }}
           RL_API_KEY: ${{ secrets.RL_API_KEY }}
+          SEC_USER_AGENT: ${{ vars.SEC_USER_AGENT }}   # "<organization> <contact email>", as SEC asks
+          SEC_ENABLED: ${{ vars.SEC_ENABLED }}
+          HHS_ENABLED: ${{ vars.HHS_ENABLED }}
         run: python scripts/ingest.py
 
       - name: Refresh MITRE ATT&CK index (weekly)
@@ -55,13 +58,14 @@ jobs:
 
       - name: Commit changes
         run: |
-          if git diff --quiet -- site/data data/watch_state.json && [ -z "$(git ls-files --others --exclude-standard site/data data/watch_state.json)" ]; then
+          if git diff --quiet -- site/data data/watch_state.json data/epss_cache.json && [ -z "$(git ls-files --others --exclude-standard site/data data/watch_state.json data/epss_cache.json)" ]; then
             echo "No data changes."
             exit 0
           fi
           git config user.name "incident-monitor-bot"
           git config user.email "incident-monitor-bot@users.noreply.github.com"
-          git add site/data data/watch_state.json 2>/dev/null || git add site/data
+          git add site/data
+          for f in data/watch_state.json data/epss_cache.json; do if [ -f "$f" ]; then git add "$f"; fi; done
           git commit -m "data: feed update $(date -u +%Y-%m-%dT%H:%MZ)"
           if ! git push; then
             # another run pushed first: replay this update on top, or leave it to the next run

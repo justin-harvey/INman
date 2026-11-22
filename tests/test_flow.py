@@ -106,6 +106,31 @@ class FlowTests(unittest.TestCase):
         themes = {t["id"] for t in doc["themes"]}
         self.assertTrue(all(it["theme"] in themes for it in doc["items"]))
 
+    def test_epss_scores_vulnerabilities(self):
+        self.put(self.flow.EPSS_API, {"status": "OK", "data": [
+            {"cve": "CVE-2026-1111", "epss": "0.420000000", "percentile": "0.97000", "date": "2026-11-22"},
+            {"cve": "CVE-2026-0001", "epss": "0.030000000", "percentile": "0.80000", "date": "2026-11-22"}]})
+        doc = self.run_flow()
+        nvd = next(i for i in doc["items"] if i["source"] == "NVD")
+        kev = next(i for i in doc["items"] if i.get("cve") == "CVE-2026-0001")
+        self.assertEqual((nvd["epss"], nvd["epss_pct"], nvd["severity"]), (0.42, 0.97, 1.0))
+        self.assertEqual((kev["epss"], kev["severity"]), (0.03, 0.95))          # below the bar: unchanged
+        self.assertIn("1 likely to be exploited", doc["enrichment"]["epss"])
+        self.assertNotIn("epss", doc["sources"])                                # not a feed lane on the orb
+        with open(os.path.join(self.tmp, "site", "data", "flow_history.json")) as f:
+            hist = json.load(f)["epss"]
+        self.assertEqual(sum(hist["likely_daily"].values()), 1)
+        self.assertEqual(hist["top_30d"][0]["cve"], "CVE-2026-1111")
+        self.assertTrue(hist["top_30d"][1]["kev"])
+        doc = self.run_flow()                                                   # same day: served from the cache
+        self.assertIn("(0 lookups)", doc["enrichment"]["epss"])
+        self.assertEqual(next(i for i in doc["items"] if i["source"] == "NVD")["epss"], 0.42)
+
+    def test_epss_outage_keeps_the_run_going(self):
+        doc = self.run_flow()                                                   # no EPSS fixture: lookup fails
+        self.assertTrue(doc["enrichment"]["epss"].startswith("error"))
+        self.assertTrue(any(i["source"] == "NVD" for i in doc["items"]))
+
     def test_corroboration_merges_trackers(self):
         doc = self.run_flow()
         acme = [i for i in doc["items"] if i.get("victim", "").lower() == "acme.example"]

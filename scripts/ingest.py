@@ -8,9 +8,12 @@ What it does, in order:
   3. ransomwatch adapter (public domain): counts global leak-site posts per day
      into site/data/context.json. Its posts carry no country, so they are used
      only as a market-volume backdrop, never as U.S. incidents.
-  4. Applies analyst overrides from data/overrides.json (e.g. promote a claim
+  4. Official disclosures (scripts/official.py): SEC 8-K cybersecurity filings
+     and HHS breach-portal hacking reports become Tier 1 incidents, or confirm
+     and promote an existing entry for the same organization.
+  5. Applies analyst overrides from data/overrides.json (e.g. promote a claim
      to Tier 1 with the confirming source).
-  5. Validates, sorts and writes files only when something changed.
+  6. Validates, sorts and writes files only when something changed.
 
 A feed that fails is logged in site/data/meta.json; the run still succeeds so
 one outage upstream never blanks the dashboard.
@@ -23,6 +26,10 @@ Environment:
   RL_COUNTRY        default US
   LOOKBACK_DAYS     default 30 (claims older than this are ignored)
   RANSOMWATCH_URL   default the public posts.json
+  SEC_ENABLED, HHS_ENABLED          "false" turns either official feed off (default on)
+  SEC_LOOKBACK_DAYS, HHS_LOOKBACK_DAYS  default 60
+  HHS_EVERY_HOURS   default 6 (the portal is read four times a day; every manual run reads it too)
+  SEC_USER_AGENT    "<organization> <contact email>", as SEC asks of automated clients
   FIXTURE_DIR       read feeds from local files instead of the network (tests)
 """
 import datetime as dt
@@ -35,6 +42,7 @@ from collections import Counter
 
 sys.path.insert(0, os.path.dirname(__file__))
 from schema import FIELDS, TIERS, norm_org, validate  # noqa: E402
+import official  # noqa: E402
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 DATA = os.path.join(ROOT, "site", "data")
@@ -192,6 +200,8 @@ def main():
         incidents.extend(new)
     except Exception as e:  # keep the dashboard up if a feed breaks
         status["ransomware.live"] = f"error: {e.__class__.__name__}: {e}"
+
+    official.run(incidents, blank, TODAY, status, load(META, {}).get("feeds"))
 
     try:
         ctx, status["ransomwatch"] = ransomwatch_context()

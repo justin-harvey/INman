@@ -135,6 +135,13 @@ def vuln_section(hist, days):
         a, b = sum(wk[:half]), sum(wk[half:2 * half])
         out[theme] = {"total": sum(vals), "per_week": round(sum(wk) / len(wk), 1) if wk else 0,
                       "first_half": a, "second_half": b, "direction": direction(a, b), "weekly": wk}
+    ep = hist.get("epss")
+    if ep:
+        likely = sum(int(ep.get("likely_daily", {}).get(d, 0)) for d in days)
+        total = out["cve"]["total"]
+        out["epss"] = {"threshold": ep.get("threshold", 0.1), "likely": likely,
+                       "share_pct": round(likely / total * 100, 1) if total else 0,
+                       "top": [{k: t.get(k) for k in ("cve", "epss", "pct", "url", "kev", "title")} for t in ep.get("top_30d", [])[:6]]}
     return out
 
 
@@ -160,6 +167,10 @@ def incident_section(incidents):
         "corp": {"total": len(corp), "suspected_outages": t3(corp)},
         "ops_disrupted_pct": round(sum(1 for r in rows if r.get("ops_disrupted") is True) / len(rows) * 100),
         "actor_unnamed_pct": round(unnamed / len(rows) * 100),
+        "official": {"sec": sum(1 for r in rows if r.get("origin") == "sec_edgar"),
+                     "hhs": sum(1 for r in rows if r.get("origin") == "hhs_ocr"),
+                     "confirmed_existing": sum(1 for r in rows if r.get("origin") not in ("sec_edgar", "hhs_ocr")
+                                               and re.search(r"(SEC 8-K|HHS breach report) \(", r.get("confirmed_by") or ""))},
         "records_total": rec_total,
         "records_top3_pct": round(sum(counted[:3]) / rec_total * 100) if rec_total else 0,
     }
@@ -212,6 +223,18 @@ def findings(c, v, inc, per):
         out.append({"key": "vulns", "text": f"CISA added about {v['kev']['per_week']:.0f} exploited vulnerabilities a week "
                     f"({word[v['kev']['direction']]}); new high and critical CVEs ran about {v['cve']['per_week']:.0f} a week "
                     f"({word[v['cve']['direction']]})."})
+    if v and v.get("epss") and v["epss"]["top"]:
+        e = v["epss"]
+        top = ", ".join(f"{t['cve']} ({t['epss'] * 100:.0f}%{', on CISA list' if t.get('kev') else ''})" for t in e["top"][:3])
+        out.append({"key": "epss", "text": f"At least {e['likely']} new high and critical CVEs ({e['share_pct']:g}%) have a "
+                    f"{e['threshold'] * 100:.0f}% or higher chance of being exploited within 30 days, by FIRST's EPSS score. "
+                    f"Highest now: {top}."})
+    if inc and inc.get("official") and (inc["official"]["sec"] or inc["official"]["hhs"]):
+        o = inc["official"]
+        bits = [f"{o['sec']} SEC 8-K cybersecurity disclosures" if o["sec"] else "",
+                f"{o['hhs']} HHS hacking reports" if o["hhs"] else ""]
+        out.append({"key": "official", "text": "Official records add " + " and ".join(b for b in bits if b) + " to the U.S. list"
+                    + (f", and confirmed {o['confirmed_existing']} earlier claims or outages." if o["confirmed_existing"] else ".")})
     if inc:
         ind = inc["top_industries"]
         if ind:
@@ -228,7 +251,7 @@ def findings(c, v, inc, per):
     return out
 
 
-def caveats(hist, meta, days):
+def caveats(hist, meta, days, inc=None):
     out = []
     rl = (meta or {}).get("feeds", {}).get("ransomware.live", "")
     if not str(rl).startswith("ok"):
@@ -244,6 +267,9 @@ def caveats(hist, meta, days):
     if late:
         out.append(f"{names([{'name': x} for x in late])} only reach back a few weeks (status pages and news feeds return recent "
                    "history only), so their recent rise is the record filling in, not a trend.")
+    if inc and inc.get("official", {}).get("hhs"):
+        out.append("Healthcare has a mandatory public breach register (HHS) and most sectors do not, so its lead partly "
+                   "reflects better reporting, not only more attacks. HHS also posts reports up to a few weeks late.")
     out.append("U.S. incident dates are disclosure dates, and confirmed breaches often surface weeks after they happen, "
                "so the latest weeks will grow as disclosures arrive.")
     out.append(f"{len(days)} days describes the current pace, not the next quarter. The history builds up with every run.")
@@ -263,7 +289,7 @@ def build(hist, incidents, meta, today=None):
         "window": {"start": days[0], "end": days[-1], "days": span},
         "findings": findings(c, v, inc, c["period_days"]),
         "claims": c, "vulns": v, "incidents": inc,
-        "caveats": caveats(hist, meta, days),
+        "caveats": caveats(hist, meta, days, inc),
     }
 
 

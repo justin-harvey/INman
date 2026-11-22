@@ -27,7 +27,7 @@
     $("trendsCaveats").replaceChildren(...(t.caveats || []).map((c) => h("li", { text: c })));
     lastClaims = t.claims;
     renderChart(t.claims);
-    renderGroups(t.claims);
+    renderGroups(t.claims, t.vulns);
   }
 
   function renderChart(c) {
@@ -80,7 +80,20 @@
       })));
   }
 
-  function renderGroups(c) {
+  function epssList(v) {
+    const e = v && v.epss;
+    if (!e || !e.top || !e.top.length) return null;
+    return h("section", { class: "tg" }, h("h3", { text: "Most likely exploited (EPSS)" }),
+      h("ul", {}, ...e.top.map((t) => {
+        const url = /^https:\/\/nvd\.nist\.gov\//.test(t.url || "") ? t.url : null;
+        const name = url ? h("a", { href: url, target: "_blank", rel: "noopener noreferrer", title: t.title || t.cve, text: t.cve })
+          : h("span", { title: t.title || t.cve, text: t.cve });
+        return h("li", {}, h("span", {}, name, t.kev ? h("b", { class: "kevtag", title: "On CISA's Known Exploited Vulnerabilities list", text: "KEV" }) : null),
+          h("span", { class: "n", text: `${(t.epss * 100).toFixed(t.epss < 0.1 ? 1 : 0)}%` }));
+      })));
+  }
+
+  function renderGroups(c, v) {
     const per = c ? c.period_days : 30;
     const arrow = (a) => a.periods.join(" → ");
     const parts = c ? [
@@ -89,7 +102,10 @@
       groupList(`New in last ${per} days`, c.new, (a) => String(a.periods[a.periods.length - 1])),
       groupList("Went quiet", c.quiet, (a) => `${a.periods.slice(0, -1).reduce((x, y) => x + y, 0)} → 0`),
     ].filter(Boolean) : [];
-    if (parts.length) parts.push(h("p", { class: "muted small tg-note", text: `Claims per ${per}-day period, oldest first. Linked names open the group's MITRE ATT&CK page.` }));
+    const ep = epssList(v);
+    $("trendsEpss").replaceChildren(...(ep ? [ep] : []));
+    if (parts.length) parts.push(h("p", { class: "muted small tg-note", text: `Claims per ${per}-day period, oldest first. Linked names open the group's MITRE ATT&CK page.`
+      + (ep ? " EPSS is FIRST's estimated chance that a vulnerability is exploited in the next 30 days." : "") }));
     $("trendsGroups").replaceChildren(...parts);
   }
 

@@ -32,6 +32,9 @@ CONFIG = os.path.join(ROOT, "data", "flow_sources.json")
 OUT = os.path.join(ROOT, "site", "data", "flow.json")
 INCIDENTS = os.path.join(ROOT, "site", "data", "incidents.json")
 HISTORY = os.path.join(ROOT, "site", "data", "flow_history.json")
+EPSS_CACHE = os.path.join(ROOT, "data", "epss_cache.json")
+EPSS_API = "https://api.first.org/data/v1/epss"
+EPSS_LIKELY = 0.10      # "likely to be exploited": at least a 10% chance of exploitation activity in the next 30 days
 UA = "inman-incident-monitor/1.0 (+private team dashboard)"
 NOW = dt.datetime.now(dt.timezone.utc).replace(microsecond=0)
 
@@ -408,6 +411,69 @@ ADAPTERS = {"ransomwatch": a_ransomwatch, "ransomware_live": a_ransomware_live, 
             "nvd": a_nvd, "statuspages": a_statuspages, "upptime": a_upptime, "rss": a_rss, "inman": a_inman}
 
 
+CVE_ID = re.compile(r"CVE-\d{4}-\d{4,}")
+
+
+def epss_enrich(known):
+    """Attach FIRST EPSS scores to vulnerability items (NVD and CISA KEV).
+
+    EPSS is the probability that a CVE sees exploitation activity in the next 30 days. Scores change
+    daily, so each CVE is looked up at most once per UTC day (data/epss_cache.json); a new CVE that
+    EPSS has not scored yet is retried the next day. Likely-to-be-exploited items gain severity, so
+    they stand out on the orb and survive the history file's per-day cut. Returns a status line."""
+    import time
+    try:
+        with open(EPSS_CACHE) as f:
+            cache = json.load(f).get("scores", {})
+    except (OSError, ValueError):
+        cache = {}
+    today = NOW.date().isoformat()
+    vuln = [it for it in known.values() if it["source"] in ("NVD", "CISA KEV")]
+    for it in vuln:
+        m = CVE_ID.search(it["title"])
+        if m:
+            it["cve"] = m.group(0)
+    wanted = sorted({it["cve"] for it in vuln if it.get("cve") and cache.get(it["cve"], {}).get("d") != today})
+    calls, err = 0, None
+    for i in range(0, len(wanted), 50):
+        if calls >= 60:                       # 3,000 CVEs a run is plenty; the rest wait for the next run
+            break
+        batch = wanted[i:i + 50]
+        if calls and not env("FIXTURE_DIR"):
+            time.sleep(0.4)
+        try:
+            data = json.loads(fetch(f"{EPSS_API}?{urllib.parse.urlencode({'cve': ','.join(batch), 'limit': 100})}"))
+        except Exception as e:                # keep yesterday's scores rather than failing the run
+            err = f"{e.__class__.__name__}: {str(e)[:80]}"
+            break
+        calls += 1
+        got = {r.get("cve"): r for r in data.get("data", [])}
+        for cve in batch:
+            r = got.get(cve)
+            cache[cve] = {"e": round(float(r["epss"]), 5), "p": round(float(r["percentile"]), 4), "d": today} if r \
+                else {"e": None, "p": None, "d": today}
+    likely = 0
+    for it in vuln:
+        sc = cache.get(it.get("cve", ""), {})
+        if sc.get("e") is None:
+            it.pop("epss", None)
+            it.pop("epss_pct", None)
+            continue
+        it["epss"], it["epss_pct"] = sc["e"], sc["p"]
+        if sc["e"] >= EPSS_LIKELY:
+            likely += 1
+            it["severity"] = round(max(it["severity"], min(1.0, 0.6 + sc["e"])), 2)
+    live_cves = {it.get("cve") for it in vuln}
+    cache = {k: v for k, v in cache.items() if k in live_cves}     # forget CVEs that left the window
+    os.makedirs(os.path.dirname(EPSS_CACHE), exist_ok=True)
+    with open(EPSS_CACHE, "w") as f:
+        json.dump({"source": "FIRST EPSS (https://www.first.org/epss/)", "scores": dict(sorted(cache.items()))}, f,
+                  separators=(",", ":"))
+    scored = sum(1 for it in vuln if "epss" in it)
+    note = f"{scored} of {len(vuln)} scored, {likely} likely to be exploited ({calls} lookups)"
+    return (f"error: {err}; using saved scores, " + note) if err else f"ok ({note})"
+
+
 def day_of(it):
     return it["ts"][:10]
 
@@ -475,6 +541,7 @@ def main():
         if it.get("actor"):
             it["actor"] = canon.get(norm(it["actor"]), it["actor"])
     corroborate(known)
+    enrichment = {"epss": epss_enrich(known) if env("EPSS_ENABLED", "true").lower() != "false" else "off"}
     for pid in list(fetched):
         if pid not in known:
             fetched.pop(pid)
@@ -528,14 +595,34 @@ def main():
         hist_items.extend(group[:per_day])
     hist_items.sort(key=lambda i: i["ts"], reverse=True)
 
+    # EPSS: new high/critical CVEs per publication day that are likely to be exploited, and the top few
+    epss_daily = {}
+    for it in known.values():
+        if it["source"] == "NVD" and (it.get("epss") or 0) >= EPSS_LIKELY and parse_time(it["ts"]) >= hist_since:
+            epss_daily[day_of(it)] = epss_daily.get(day_of(it), 0) + 1
+    recent = NOW - dt.timedelta(days=30)
+    top = sorted((it for it in known.values() if it.get("epss") is not None and parse_time(it["ts"]) >= recent),
+                 key=lambda i: (-i["epss"], i["ts"]))
+    kev_cves = {it.get("cve") for it in known.values() if it["source"] == "CISA KEV"}
+    seen_cve, epss_top = set(), []
+    for it in top:
+        if it["cve"] in seen_cve:
+            continue
+        seen_cve.add(it["cve"])
+        epss_top.append({"cve": it["cve"], "epss": it["epss"], "pct": it["epss_pct"], "title": it["title"],
+                         "url": it["url"], "kev": it["cve"] in kev_cves})
+        if len(epss_top) >= 8:
+            break
+
     os.makedirs(os.path.dirname(OUT), exist_ok=True)
     actors = {a: m for a, m in sorted(actor_meta.items())}
     write(OUT, {"generated_at": iso(NOW), "window_days": live_days, "history_days": hist_days,
-                "themes": conf["themes"], "sources": status, "actors": actors, "items": live})
+                "themes": conf["themes"], "sources": status, "enrichment": enrichment, "actors": actors, "items": live})
     write(HISTORY, {"generated_at": iso(NOW), "history_days": hist_days, "items_per_theme_day": per_day,
                     "themes": conf["themes"], "daily": daily, "actors_daily": actors_daily, "actors": actors,
+                    "epss": {"threshold": EPSS_LIKELY, "likely_daily": dict(sorted(epss_daily.items())), "top_30d": epss_top},
                     "items": hist_items})
-    for k, v in status.items():
+    for k, v in {**status, **enrichment}.items():
         print(f"{k}: {v}")
     print(f"live items: {len(live)} · history items: {len(hist_items)}")
 
