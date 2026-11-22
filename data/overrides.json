@@ -1,0 +1,14 @@
+{
+ "_how_to": "Promote or correct a feed-sourced incident by its id. Example: confirm a leak-site claim once the victim or a regulator confirms it. Open a pull request so a second analyst reviews the change.",
+ "_example": {
+  "RL-0123456789": {
+   "tier": 1,
+   "confirmed_by": "https://example.gov/notice",
+   "org_type": "Local government",
+   "sector_group": "Government",
+   "state": "SC",
+   "summary": "County confirmed data was removed from its systems."
+  }
+ },
+ "overrides": {}
+}

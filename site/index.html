@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>INman · Cyber Incident Monitor</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="styles.css">
+<script src="app.js" defer></script>
+</head>
+<body>
+<header class="top">
+  <div class="brand">
+    <h1>INman <span>Cyber Incident Monitor</span></h1>
+    <p class="sub">U.S. government and corporate cyber incidents and outages</p>
+  </div>
+  <div class="status" id="status">Loading…</div>
+</header>
+
+<main>
+  <section class="controls" aria-label="Filters">
+    <div class="seg" role="group" aria-label="Sector">
+      <button data-group="All" class="on">All</button>
+      <button data-group="Government">Government</button>
+      <button data-group="Corporate &amp; private">Corporate</button>
+    </div>
+    <div class="tiers" id="tierToggles" role="group" aria-label="Tiers"></div>
+    <label>Org type <select id="fOrgType"></select></label>
+    <label>Industry <select id="fIndustry"></select></label>
+    <label>State <select id="fState"></select></label>
+    <label class="grow">Search <input id="fSearch" type="search" placeholder="Organization, actor, summary…"></label>
+    <div class="seg" role="group" aria-label="Bucket size">
+      <button data-gran="day" class="on">Daily</button>
+      <button data-gran="week">Weekly</button>
+    </div>
+    <button id="reset" class="link">Reset</button>
+  </section>
+
+  <section class="kpis" id="kpis" aria-label="Key figures"></section>
+
+  <section class="card chart-card">
+    <div class="card-head">
+      <h2 id="chartTitle">Incident volume</h2>
+      <label class="check"><input type="checkbox" id="showContext"> Global leak-site posts (context)</label>
+    </div>
+    <div id="legend" class="legend"></div>
+    <div id="chart" class="chart" aria-label="Incident volume chart"></div>
+    <div id="brush" class="brush" aria-label="Drag to choose a date range"></div>
+    <p class="hint">Drag across the strip above to zoom; click a bar to list that period's incidents. Daily view omits month-only dates; weekly view includes them.</p>
+  </section>
+
+  <section class="grid2">
+    <div class="card"><h2>By industry</h2><div id="byIndustry" class="hbars"></div></div>
+    <div class="card"><h2>By organization type</h2><div id="byOrgType" class="hbars"></div></div>
+  </section>
+
+  <section class="card">
+    <div class="card-head">
+      <h2>Incidents <span id="tableCount" class="muted"></span></h2>
+      <div class="actions">
+        <span id="bucketChip" class="chip hidden"></span>
+        <button id="exportCsv">Export CSV</button>
+      </div>
+    </div>
+    <div class="table-wrap"><table id="table"><thead></thead><tbody></tbody></table></div>
+  </section>
+
+  <section class="card notes">
+    <h2>How to read this</h2>
+    <ul>
+      <li><b>Tier 1, confirmed:</b> the organization, a regulator or credible reporting confirmed malicious activity.</li>
+      <li><b>Tier 2, claimed:</b> listed by an extortion group or hacker with no confirmation. Some claims are false.</li>
+      <li><b>Tier 3, suspected-cyber outage:</b> systems taken offline for a security reason, no attack confirmed.</li>
+      <li><b>Tier 4, technical outage:</b> major outages attributed to non-malicious causes.</li>
+      <li>Dates are public disclosure dates. Many breaches started earlier; see each row's source. Record totals count victim-reported figures only.</li>
+      <li>This tracks organizations and events only. It never shows individuals' data or leaked files.</li>
+    </ul>
+    <p id="feedStatus" class="muted"></p>
+  </section>
+</main>
+<div id="tip" class="tip hidden" role="tooltip"></div>
+</body>
+</html>

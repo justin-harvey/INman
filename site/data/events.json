@@ -1,0 +1,12 @@
+{
+ "_how_to": "Anchor events drawn as numbered flags on the chart. Keep labels short and factual.",
+ "events": [
+  {"date": "2026-09-22", "label": "ShinyHunters claims FBI breach; FBI investigating FBIjobs.gov"},
+  {"date": "2026-10-12", "label": "Ahold Delhaize takes U.S. grocery brands' systems offline"},
+  {"date": "2026-10-28", "label": "Data on 41,000+ DHS staff published by hacktivists"},
+  {"date": "2026-11-12", "label": "Microsoft 365 global outage (Nov 12-14), not malicious"},
+  {"date": "2026-11-13", "label": "FAA nationwide ground stop after telecom overload"},
+  {"date": "2026-11-16", "label": "Optimizely supply-chain attack hits 178 organizations' sites"},
+  {"date": "2026-11-19", "label": "USDA takes multiple systems offline after security incident"}
+ ]
+}
