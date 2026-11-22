@@ -176,3 +176,34 @@ td a { color: var(--accent); }
 .velocity svg text { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; }
 .flow-sources a { color: #8fb8e6; }
 @media (max-width: 900px) { .flow-panels { grid-template-columns: 1fr; } }
+
+/* trends card */
+.small { font-size: 12px; }
+.trends-body { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 18px; margin-top: 8px; }
+.findings { margin: 0; padding-left: 18px; display: grid; gap: 7px; }
+.findings li { line-height: 1.45; }
+.trends-chart { margin: 0; min-width: 0; }
+.trends-chart figcaption { font-size: 12.5px; font-weight: 600; }
+.trends-chart svg { display: block; width: 100%; height: auto; }
+.trends-chart .grid { stroke: #e3e6eb; }
+.trends-chart .axis { fill: #5d6675; font-size: 10.5px; }
+.trends-chart .l-all { fill: none; stroke: #e67e22; stroke-width: 2.2; }
+.trends-chart .l-ex { fill: none; stroke: #142340; stroke-width: 2.2; stroke-dasharray: 5 3; }
+.trends-chart .hit { fill: transparent; cursor: default; }
+.trends-chart .dot-all { fill: #e67e22; } .trends-chart .dot-ex { fill: #142340; }
+.sw.all { background: #e67e22; height: 3px; } .sw.ex { background: #142340; height: 3px; }
+.trends-groups { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin-top: 14px; }
+.tg { border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; min-width: 0; }
+.tg h3 { font-size: 12px; margin: 0 0 6px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: .4px; }
+.tg ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 3px; font-size: 12.5px; }
+.tg li { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; }
+.tg li > span:first-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tg li .n { font-variant-numeric: tabular-nums; color: var(--muted); white-space: nowrap; }
+.tg a { color: var(--accent); text-decoration: none; }
+.trends-caveats { margin-top: 12px; font-size: 12.5px; color: var(--muted); }
+.trends-caveats summary { cursor: pointer; color: var(--ink); font-weight: 600; }
+.trends-caveats ul { margin: 6px 0 0; padding-left: 18px; }
+@media (max-width: 1100px) { .trends-groups { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 900px) { .trends-body { grid-template-columns: 1fr; } }
+@media (max-width: 560px) { .trends-groups { grid-template-columns: 1fr; } }
+.tg-note { grid-column: 1 / -1; margin: 0; }

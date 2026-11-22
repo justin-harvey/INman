@@ -1,0 +1,450 @@
+{
+ "generated_at": "2026-11-22T18:24:39Z",
+ "window": {
+  "start": "2026-08-24",
+  "end": "2026-11-21",
+  "days": 90
+ },
+ "findings": [
+  {
+   "key": "growth",
+   "text": "Extortion claims went 914 \u2192 1,126 \u2192 1,305 per 30 days (+43%). Most of the rise is one group, n0n (9 \u2192 139 \u2192 248); without it, growth is +17%."
+  },
+  {
+   "key": "concentration",
+   "text": "The top 5 groups post 38% of claims and the top 10 post 49%, out of 121 active groups. The Gentlemen and Qilin are the steady leaders (The Gentlemen 100 \u2192 124 \u2192 127, Qilin 102 \u2192 90 \u2192 97)."
+  },
+  {
+   "key": "rising",
+   "text": "Climbing: Booba team (4 \u2192 32); INC Ransom (36 \u2192 61); Rhysida (10 \u2192 29); Everest (7 \u2192 20)."
+  },
+  {
+   "key": "churn",
+   "text": "6 groups posted only in the last 30 days (Vortex, Pixelleaks and Soul); Storm, killsec3 and Clop went quiet."
+  },
+  {
+   "key": "rhythm",
+   "text": "Mondays average 63 posts and Sundays 22. Posting is batched, so compare weeks rather than days."
+  },
+  {
+   "key": "vulns",
+   "text": "CISA added about 9 exploited vulnerabilities a week (steady); new high and critical CVEs ran about 112 a week (slowing)."
+  },
+  {
+   "key": "sectors",
+   "text": "In the 187 U.S. incidents, healthcare (44), tech/SaaS (32) and education (29) lead."
+  },
+  {
+   "key": "gov",
+   "text": "Government shows up as outages: 18 of 65 government entries are suspected-cyber outages, versus 8 of 122 corporate ones."
+  },
+  {
+   "key": "impact",
+   "text": "Operations were disrupted in 52% of incidents, and no group is named in 75%. About 38M records were exposed; the three largest breaches are 52% of that."
+  }
+ ],
+ "claims": {
+  "total": 3345,
+  "period_days": 30,
+  "periods": [
+   914,
+   1126,
+   1305
+  ],
+  "change_pct": 43,
+  "surger": {
+   "name": "n0n",
+   "periods": [
+    9,
+    139,
+    248
+   ],
+   "total": 396,
+   "attack_id": null,
+   "attack_url": null
+  },
+  "periods_ex_surger": [
+   905,
+   987,
+   1057
+  ],
+  "change_pct_ex_surger": 17,
+  "surger_peaks": [
+   {
+    "date": "2026-11-09",
+    "count": 66
+   },
+   {
+    "date": "2026-11-16",
+    "count": 59
+   }
+  ],
+  "weekly": {
+   "week_ending": [
+    "2026-09-05",
+    "2026-09-12",
+    "2026-09-19",
+    "2026-09-26",
+    "2026-10-03",
+    "2026-10-10",
+    "2026-10-17",
+    "2026-10-24",
+    "2026-10-31",
+    "2026-11-07",
+    "2026-11-14",
+    "2026-11-21"
+   ],
+   "all": [
+    198,
+    222,
+    203,
+    206,
+    289,
+    222,
+    327,
+    236,
+    268,
+    259,
+    332,
+    374
+   ],
+   "ex_surger": [
+    198,
+    222,
+    194,
+    202,
+    285,
+    218,
+    241,
+    186,
+    257,
+    210,
+    255,
+    272
+   ]
+  },
+  "weekday_avg": {
+   "Monday": 62.8,
+   "Tuesday": 41.9,
+   "Wednesday": 44.5,
+   "Thursday": 29.2,
+   "Friday": 34.8,
+   "Saturday": 24.3,
+   "Sunday": 21.5
+  },
+  "top5_share": 38,
+  "top10_share": 49,
+  "groups_active": 121,
+  "steady": [
+   {
+    "name": "The Gentlemen",
+    "periods": [
+     100,
+     124,
+     127
+    ],
+    "total": 351,
+    "attack_id": "G1058",
+    "attack_url": "https://attack.mitre.org/groups/G1058"
+   },
+   {
+    "name": "Qilin",
+    "periods": [
+     102,
+     90,
+     97
+    ],
+    "total": 289,
+    "attack_id": "S1242",
+    "attack_url": "https://attack.mitre.org/software/S1242"
+   },
+   {
+    "name": "Akira",
+    "periods": [
+     43,
+     32,
+     36
+    ],
+    "total": 111,
+    "attack_id": "G1024",
+    "attack_url": "https://attack.mitre.org/groups/G1024"
+   }
+  ],
+  "rising": [
+   {
+    "name": "Booba team",
+    "periods": [
+     4,
+     17,
+     32
+    ],
+    "total": 53,
+    "attack_id": null,
+    "attack_url": null
+   },
+   {
+    "name": "INC Ransom",
+    "periods": [
+     36,
+     38,
+     61
+    ],
+    "total": 135,
+    "attack_id": "G1032",
+    "attack_url": "https://attack.mitre.org/groups/G1032"
+   },
+   {
+    "name": "Rhysida",
+    "periods": [
+     10,
+     14,
+     29
+    ],
+    "total": 53,
+    "attack_id": null,
+    "attack_url": null
+   },
+   {
+    "name": "Everest",
+    "periods": [
+     7,
+     24,
+     20
+    ],
+    "total": 51,
+    "attack_id": null,
+    "attack_url": null
+   }
+  ],
+  "new": [
+   {
+    "name": "Vortex",
+    "periods": [
+     0,
+     0,
+     42
+    ],
+    "total": 42,
+    "attack_id": null,
+    "attack_url": null
+   },
+   {
+    "name": "Pixelleaks",
+    "periods": [
+     0,
+     0,
+     35
+    ],
+    "total": 35,
+    "attack_id": null,
+    "attack_url": null
+   },
+   {
+    "name": "Soul",
+    "periods": [
+     0,
+     0,
+     28
+    ],
+    "total": 28,
+    "attack_id": null,
+    "attack_url": null
+   },
+   {
+    "name": "Climax",
+    "periods": [
+     0,
+     0,
+     19
+    ],
+    "total": 19,
+    "attack_id": null,
+    "attack_url": null
+   },
+   {
+    "name": "Curious worm",
+    "periods": [
+     0,
+     0,
+     16
+    ],
+    "total": 16,
+    "attack_id": null,
+    "attack_url": null
+   },
+   {
+    "name": "Aoqin leaks",
+    "periods": [
+     0,
+     0,
+     15
+    ],
+    "total": 15,
+    "attack_id": null,
+    "attack_url": null
+   }
+  ],
+  "quiet": [
+   {
+    "name": "Storm",
+    "periods": [
+     52,
+     25,
+     0
+    ],
+    "total": 77,
+    "attack_id": null,
+    "attack_url": null
+   },
+   {
+    "name": "killsec3",
+    "periods": [
+     0,
+     46,
+     0
+    ],
+    "total": 46,
+    "attack_id": null,
+    "attack_url": null
+   },
+   {
+    "name": "Clop",
+    "periods": [
+     2,
+     24,
+     0
+    ],
+    "total": 26,
+    "attack_id": "S0611",
+    "attack_url": "https://attack.mitre.org/software/S0611"
+   },
+   {
+    "name": "Zawoo",
+    "periods": [
+     22,
+     4,
+     0
+    ],
+    "total": 26,
+    "attack_id": null,
+    "attack_url": null
+   },
+   {
+    "name": "ShinyHunters",
+    "periods": [
+     13,
+     8,
+     0
+    ],
+    "total": 21,
+    "attack_id": "G1057",
+    "attack_url": "https://attack.mitre.org/groups/G1057"
+   }
+  ]
+ },
+ "vulns": {
+  "kev": {
+   "total": 115,
+   "per_week": 8.8,
+   "first_half": 54,
+   "second_half": 51,
+   "direction": "flat",
+   "weekly": [
+    10,
+    14,
+    7,
+    10,
+    7,
+    6,
+    9,
+    8,
+    10,
+    3,
+    12,
+    9
+   ]
+  },
+  "cve": {
+   "total": 1400,
+   "per_week": 112.5,
+   "first_half": 789,
+   "second_half": 561,
+   "direction": "falling",
+   "weekly": [
+    107,
+    154,
+    122,
+    121,
+    127,
+    158,
+    87,
+    77,
+    102,
+    67,
+    90,
+    138
+   ]
+  }
+ },
+ "incidents": {
+  "total": 187,
+  "first": "2026-09-21",
+  "last": "2026-11-21",
+  "by_tier": {
+   "1": 124,
+   "2": 25,
+   "3": 26,
+   "4": 12
+  },
+  "top_industries": [
+   {
+    "name": "Healthcare",
+    "count": 44
+   },
+   {
+    "name": "Tech/SaaS",
+    "count": 32
+   },
+   {
+    "name": "Education",
+    "count": 29
+   },
+   {
+    "name": "Government administration",
+    "count": 25
+   }
+  ],
+  "top_states": [
+   {
+    "name": "CA",
+    "count": 24
+   },
+   {
+    "name": "TX",
+    "count": 14
+   },
+   {
+    "name": "NY",
+    "count": 11
+   }
+  ],
+  "gov": {
+   "total": 65,
+   "suspected_outages": 18
+  },
+  "corp": {
+   "total": 122,
+   "suspected_outages": 8
+  },
+  "ops_disrupted_pct": 52,
+  "actor_unnamed_pct": 75,
+  "records_total": 37571361,
+  "records_top3_pct": 52
+ },
+ "caveats": [
+  "Extortion claims are global: RansomLook does not record the victim's country, so there is no U.S. share until ransomware.live is cleared and turned on.",
+  "Outages and Advisories & news only reach back a few weeks (status pages and news feeds return recent history only), so their recent rise is the record filling in, not a trend.",
+  "U.S. incident dates are disclosure dates, and confirmed breaches often surface weeks after they happen, so the latest weeks will grow as disclosures arrive.",
+  "90 days describes the current pace, not the next quarter. The history builds up with every run."
+ ]
+}

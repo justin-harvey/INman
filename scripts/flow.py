@@ -470,7 +470,7 @@ def main():
                 canon[k] = a
     for k, name in canon.items():       # prefer ATT&CK's spelling; otherwise capitalise all-lowercase names
         m = find(name)
-        canon[k] = m["name"] if m else (name[:1].upper() + name[1:] if name.islower() else name)
+        canon[k] = m["name"] if m else (name[:1].upper() + name[1:] if re.fullmatch(r"[a-z][a-z ]*", name) else name)
     for it in list(known.values()) + list(fetched.values()):
         if it.get("actor"):
             it["actor"] = canon.get(norm(it["actor"]), it["actor"])

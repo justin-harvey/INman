@@ -33,10 +33,13 @@ site/                 the dashboard (Netlify publishes this folder)
   data/meta.json      last update time + feed status (written by ingest)
   data/flow.json      last week of live items for the orb (written by flow.py)
   data/flow_history.json  90 days: daily counts + top items per theme per day
+  data/trends.json    trend summary for the Trends card (written by trends.py)
   flow.js             the orb
+  trends.js           the Trends card
 scripts/
   ingest.py           pulls feeds, dedupes, applies overrides
   flow.py             builds the orb's live flow from data/flow_sources.json
+  trends.py           recomputes the Trends card from the history and incidents
   xlsx_to_json.py     converts the analyst workbook into incidents.json
   check_data.py       Netlify build gate: refuses malformed data
   schema.py           shared field list, tiers, validation
@@ -91,6 +94,8 @@ History builds up from the first scheduled run for feeds that only publish recen
 | Confirmed U.S. incidents | This repo's curated incidents (claims and outages go to their own sectors) | — |
 
 **Corroborated claims.** When the same victim appears on more than one tracker within 4 days, the claims merge into one point with a white ring, a "seen on" list and a higher severity. Ransomware groups do post false claims, so a second tracker is a useful (not conclusive) signal.
+
+**Trends.** Below the orb, the Trends card summarizes the last 90 complete days: how fast extortion claims are growing (shown with and without any single group that drives most of the growth, since one bulk poster can hide the underlying pace), how concentrated they are, which groups are steady, climbing, new or quiet, the weekly posting rhythm, the pace of exploited and new vulnerabilities, and the shape of the curated U.S. incidents. `scripts/trends.py` rebuilds every sentence and figure from the data on each scheduled run, so nothing on the card is hand-written. Its "What this can't tell you yet" list names the limits: claims are global until ransomware.live is on, feeds with short history are filling in rather than rising, and disclosure lag makes the latest weeks look low.
 
 **Most active groups.** Claims and curated incidents that name a group are counted for the chosen range. Groups that match a MITRE ATT&CK® group or software entry link to its profile. `scripts/attack_index.py` rebuilds `site/data/attack_index.json` from MITRE's public STIX data once a week; automatic matches are accepted only when the ATT&CK entry describes ransomware, extortion or cybercrime, so a leak-site group that shares a name with an unrelated espionage tool is not linked. When a tracker spells a group differently from ATT&CK (for example `alphv` for BlackCat), add the pair to `data/actor_aliases.json`; listed pairs always match. MITRE ATT&CK content © The MITRE Corporation, used under the [ATT&CK Terms of Use](https://attack.mitre.org/resources/legal-and-branding/terms-of-use/).
 

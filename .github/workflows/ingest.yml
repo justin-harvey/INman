@@ -50,6 +50,9 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}     # used only by the optional Upptime adapter
         run: python scripts/flow.py
 
+      - name: Recompute trends
+        run: python scripts/trends.py
+
       - name: Commit changes
         run: |
           if git diff --quiet -- site/data data/watch_state.json && [ -z "$(git ls-files --others --exclude-standard site/data data/watch_state.json)" ]; then

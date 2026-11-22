@@ -9,6 +9,7 @@
 <link rel="stylesheet" href="styles.css">
 <script src="app.js" defer></script>
 <script src="flow.js" defer></script>
+<script src="trends.js" defer></script>
 </head>
 <body>
 <header class="top">
@@ -55,6 +56,26 @@
     </div>
     <p class="flow-sources" id="flowSourceList"></p>
     <p class="flow-sources">Uses data from CISA's Known Exploited Vulnerabilities catalog, ransomwatch, and RansomLook (CC BY 4.0, ransomlook.io). MITRE ATT&amp;CK® content © The MITRE Corporation, used under the <a href="https://attack.mitre.org/resources/legal-and-branding/terms-of-use/" target="_blank" rel="noopener noreferrer">ATT&amp;CK Terms of Use</a>. This product uses the NVD API but is not endorsed or certified by the NVD.</p>
+  </section>
+
+  <section class="card trends hidden" id="trendsCard" aria-label="Trends">
+    <div class="card-head">
+      <h2>Trends <span id="trendsWindow" class="muted"></span></h2>
+      <span id="trendsUpdated" class="muted small"></span>
+    </div>
+    <div class="trends-body">
+      <ul id="trendsFindings" class="findings"></ul>
+      <figure class="trends-chart">
+        <figcaption>Extortion claims per week (global)</figcaption>
+        <div id="trendsLegend" class="legend"></div>
+        <div id="trendsChart"></div>
+      </figure>
+    </div>
+    <div class="trends-groups" id="trendsGroups"></div>
+    <details class="trends-caveats">
+      <summary>What this can't tell you yet</summary>
+      <ul id="trendsCaveats"></ul>
+    </details>
   </section>
 
   <section class="controls" aria-label="Filters">
