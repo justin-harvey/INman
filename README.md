@@ -83,12 +83,20 @@ History builds up from the first scheduled run for feeds that only publish recen
 
 | Theme | Sources (default) | Terms |
 | --- | --- | --- |
-| Extortion claims | ransomwatch (global, on); ransomware.live (U.S., off until licensing is cleared) | Unlicense; ransomware.live terms above |
+| Extortion claims | ransomwatch and RansomLook (global, on); ransomware.live (U.S., off until licensing is cleared) | ransomwatch: Unlicense. RansomLook: CC BY 4.0, credit shown on the dashboard. ransomware.live: terms above |
 | Exploited vulnerabilities | CISA Known Exploited Vulnerabilities feed | U.S. government public data |
 | New high/critical CVEs | NVD CVE API 2.0 (optional secret `NVD_API_KEY` raises the rate limit) | Public API. Show NVD's notice: "This product uses the NVD API but is not endorsed or certified by the NVD." |
-| Outages & service health | Public Statuspage pages (GitHub, Cloudflare, Atlassian, Twilio, Zoom); your own Upptime repo (off; set `repo` and check which label your Upptime repo puts on downtime issues) | Public status pages |
+| Outages & service health | Public Statuspage pages (GitHub, Cloudflare, Atlassian, Twilio, Zoom); the built-in **site watchlist** (`data/watchlist.json`, empty until you add sites); optionally your own Upptime repo (off) | Public status pages |
 | Advisories & news | CISA advisories, BleepingComputer and The Record RSS (headlines and links only) | Headlines only |
 | Confirmed U.S. incidents | This repo's curated incidents (claims and outages go to their own sectors) | — |
+
+**Corroborated claims.** When the same victim appears on more than one tracker within 4 days, the claims merge into one point with a white ring, a "seen on" list and a higher severity. Ransomware groups do post false claims, so a second tracker is a useful (not conclusive) signal.
+
+**Most active groups.** Claims and curated incidents that name a group are counted for the chosen range. Groups that match a MITRE ATT&CK® group or software entry link to its profile. `scripts/attack_index.py` rebuilds `site/data/attack_index.json` from MITRE's public STIX data once a week; when a tracker spells a group differently from ATT&CK (for example `alphv` for BlackCat), add the pair to `data/actor_aliases.json`. MITRE ATT&CK content © The MITRE Corporation, used under the [ATT&CK Terms of Use](https://attack.mitre.org/resources/legal-and-branding/terms-of-use/).
+
+**Vulnerability velocity.** New high/critical CVEs and additions to CISA's exploited list, per day (per 4 hours for 48 hours), for the chosen range.
+
+**Site watchlist.** Add `{"name": "...", "url": "https://..."}` entries to `data/watchlist.json`. Each run checks them; a timeout, connection error or HTTP 5xx counts as down (4xx counts as up, since bot protection often answers 403). Going down and coming back each appear in the outages sector, and the state is kept in `data/watch_state.json`.
 
 Items persist even after they drop out of a short feed such as RSS. A source that fails is shown as such on the dashboard and does not erase the others.
 

@@ -1,0 +1,5 @@
+{
+ "_how_to": "Sites the dashboard checks every 30 minutes. A site counts as down on a timeout, connection error or HTTP 5xx; 4xx answers (often bot protection) count as up. Each change from up to down, and back, appears in the orb's outages sector. Add entries like the example; keep the list to sites you actually care about.",
+ "_example": {"name": "City of South Portland", "url": "https://www.southportland.gov/"},
+ "sites": []
+}

@@ -1,0 +1,11 @@
+{
+ "_how_to": "Map the names leak-site trackers use to the name MITRE ATT&CK uses, when they differ. Keys and values are matched case- and punctuation-insensitively. Add entries as you spot gaps in the dashboard's 'Most active groups' panel.",
+ "aliases": {
+  "lockbit3": "LockBit 3.0",
+  "lockbit3.0": "LockBit 3.0",
+  "alphv": "BlackCat",
+  "blackbasta": "Black Basta",
+  "cl0p": "Clop",
+  "scattered spider": "Scattered Spider"
+ }
+}

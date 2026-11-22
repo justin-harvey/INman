@@ -34,6 +34,10 @@ jobs:
           RL_API_KEY: ${{ secrets.RL_API_KEY }}
         run: python scripts/ingest.py
 
+      - name: Refresh MITRE ATT&CK index (weekly)
+        run: python scripts/attack_index.py --max-age-days 7
+        continue-on-error: true
+
       - name: Build live flow (orb)
         env:
           RL_ENABLED: ${{ vars.RL_ENABLED }}
@@ -46,12 +50,12 @@ jobs:
 
       - name: Commit changes
         run: |
-          if git diff --quiet -- site/data; then
+          if git diff --quiet -- site/data data/watch_state.json && [ -z "$(git ls-files --others --exclude-standard site/data data/watch_state.json)" ]; then
             echo "No data changes."
             exit 0
           fi
           git config user.name "incident-monitor-bot"
           git config user.email "incident-monitor-bot@users.noreply.github.com"
-          git add site/data
+          git add site/data data/watch_state.json 2>/dev/null || git add site/data
           git commit -m "data: feed update $(date -u +%Y-%m-%dT%H:%MZ)"
           git push

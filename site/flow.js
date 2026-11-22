@@ -21,8 +21,8 @@
   const MON = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
   const fmtClock = (ms) => { const d = new Date(ms); return `${MON[d.getMonth()]} ${d.getDate()}, ${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`; };
   const fmtDay = (ms) => { const d = new Date(ms); return `${MON[d.getMonth()]} ${d.getDate()}`; };
-  const SOURCE_KEY = (src) => src.endsWith(" status") ? "statuspages" : ({ ransomwatch: "ransomwatch", "ransomware.live": "ransomware_live", "CISA KEV": "cisa_kev", NVD: "nvd", Upptime: "upptime", INman: "inman" })[src] || "rss";
-  const LANE_LABEL = { ransomwatch: "ransomwatch", ransomware_live: "ransomware.live", cisa_kev: "CISA KEV", nvd: "NVD CVEs", statuspages: "Status pages", upptime: "Upptime", rss: "Advisories & news RSS", inman: "INman curated" };
+  const SOURCE_KEY = (src) => src.endsWith(" status") ? "statuspages" : ({ ransomwatch: "ransomwatch", RansomLook: "ransomlook", Watchlist: "watchlist", "ransomware.live": "ransomware_live", "CISA KEV": "cisa_kev", NVD: "nvd", Upptime: "upptime", INman: "inman" })[src] || "rss";
+  const LANE_LABEL = { ransomlook: "RansomLook", watchlist: "Site watchlist", ransomwatch: "ransomwatch", ransomware_live: "ransomware.live", cisa_kev: "CISA KEV", nvd: "NVD CVEs", statuspages: "Status pages", upptime: "Upptime", rss: "Advisories & news RSS", inman: "INman curated" };
   const SHORT = { claims: "Extortion claims", kev: "Exploited vulns", cve: "New CVEs", outages: "Outages", advisories: "Advisories & news", incidents: "U.S. incidents" };
   const shortLabel = (th) => th.short || SHORT[th.id] || th.label;
   /* text centred on angle `am` along a circle; flipped on the lower half so it never reads upside down */
@@ -104,7 +104,7 @@
       return { it, a: a0 + 0.04 + hash(it.id) * (a1 - a0 - 0.08), j: (hash(it.id + "r") - 0.5) * 0.08, s: 1.3 + 2.4 * it.severity, x: 0, y: 0 };
     });
     fx.tickerHead = null;
-    buildLanes(); renderThemes(); renderSources(); coverageNote();
+    buildLanes(); renderThemes(); renderSources(); coverageNote(); renderActors(); renderVelocity();
   }
 
   async function poll() {
@@ -181,6 +181,7 @@
     fx.geo = { W, H, lanesW, cx: lanesW + (W - lanesW) / 2, cy: H / 2 + 6,
       R: Math.min((W - lanesW) / 2 - (W >= 640 ? 100 : 34), H / 2 - (W >= 640 ? 44 : 38)) };
     draw();
+    if (fx.velW !== $("flowVelocity").clientWidth) { fx.velW = $("flowVelocity").clientWidth; renderVelocity(); }
   }
   function sector(id) {
     const n = Math.max(1, fx.themes.length), i = fx.themeIdx.get(id), gap = 0.06;
@@ -254,6 +255,7 @@
       const nl = 3 + 12 * p.it.severity;
       c.beginPath(); c.moveTo(p.x, p.y); c.lineTo(p.x + Math.cos(p.a) * nl, p.y + Math.sin(p.a) * nl); c.stroke();
       c.fillStyle = col; c.beginPath(); c.arc(p.x, p.y, p.s, 0, Math.PI * 2); c.fill();
+      if (p.it.seen_on && !dim) { c.strokeStyle = "#ffffff"; c.lineWidth = 1.2; c.beginPath(); c.arc(p.x, p.y, p.s + 2.2, 0, Math.PI * 2); c.stroke(); }
       if (recent && !dim && !reduce) {
         const pulse = (Math.sin(t / 600 + p.a * 7) + 1) / 2;
         c.globalAlpha = 0.16 + 0.2 * pulse; c.beginPath(); c.arc(p.x, p.y, p.s + 3 + 3 * pulse, 0, Math.PI * 2); c.fill();
@@ -299,7 +301,7 @@
   /* ---------------- panels ---------------- */
   function buildLanes() {
     const st = (fx.live && fx.live.sources) || {};
-    fx.lanes = Object.entries(st).filter(([, v]) => v !== "off").map(([key, v]) => {
+    fx.lanes = Object.entries(st).filter(([, v]) => !/^(off|idle)/.test(String(v))).map(([key, v]) => {
       const items = fx.items.filter((i) => SOURCE_KEY(i.source) === key);
       return { key, items, label: LANE_LABEL[key] || key, ok: String(v).startsWith("ok"), color: items[0] ? colorOf(items[0].theme) : "#5b6b85" };
     });
@@ -382,12 +384,83 @@
     const p = nearest(ev); fx.canvas.style.cursor = p ? "pointer" : "default";
     if (!p) return hideTip();
     const th = fx.themes[fx.themeIdx.get(p.it.theme)];
+    const att = actorMeta(p.it.actor);
     showTip(ev, [h("b", { text: th ? th.label : p.it.theme }), h("div", { text: p.it.title }),
-      h("div", { class: "orgs", text: `${p.it.source} · ${fmtClock(p.it._t)}` })]);
+      p.it.seen_on ? h("div", { class: "orgs", text: `Seen on ${p.it.seen_on.length} trackers: ${p.it.seen_on.join(", ")}` }) : null,
+      att ? h("div", { class: "orgs", text: `MITRE ATT&CK: ${att.name} (${att.id})` }) : null,
+      h("div", { class: "orgs", text: `${p.it.seen_on ? "First seen on " : ""}${p.it.source} · ${fmtClock(p.it._t)}` })].filter(Boolean));
   }
   function click(ev) {
     const p = nearest(ev); if (!p || !/^https?:\/\//.test(p.it.url)) return;
     const a = h("a", { href: p.it.url, target: "_blank", rel: "noopener noreferrer" }); document.body.append(a); a.click(); a.remove();
+  }
+
+  /* ---------------- actors + vulnerability velocity ---------------- */
+  function actorMeta(name) {
+    if (!name) return null;
+    const m = (fx.hist && fx.hist.actors && fx.hist.actors[name]) || (fx.live.actors && fx.live.actors[name]);
+    return m && /^https:\/\/attack\.mitre\.org\//.test(m.url) ? m : null;
+  }
+
+  function renderActors() {
+    const counts = new Map(), now = Date.now(), from = now - rangeMs();
+    const daily = fx.range.days > 7 && fx.hist && fx.hist.actors_daily;
+    if (daily) {
+      for (const [a, days] of Object.entries(daily)) {
+        let n = 0; for (const [d, c] of Object.entries(days)) { const t = Date.parse(d + "T12:00:00Z"); if (t >= from && t <= now) n += c; }
+        if (n) counts.set(a, n);
+      }
+    } else {
+      for (const it of fx.items) if (it.actor) counts.set(it.actor, (counts.get(it.actor) || 0) + 1);
+    }
+    const top = [...counts.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0])).slice(0, 10);
+    const max = top.length ? top[0][1] : 1;
+    $("flowActors").replaceChildren(...(top.length ? top.map(([name, n]) => {
+      const att = actorMeta(name), bar = h("span", { class: "bar" }); bar.style.width = `${Math.max(3, (100 * n) / max)}%`;
+      return h("li", {},
+        h("span", { class: "an", title: name, text: name }),
+        h("span", { class: "track" }, bar),
+        h("span", { class: "ac", text: n.toLocaleString() }),
+        att ? h("a", { class: "att", href: att.url, target: "_blank", rel: "noopener noreferrer", title: `MITRE ATT&CK ${att.type}: ${att.name}`, text: att.id }) : h("span", { class: "att none", text: "–" }));
+    }) : [h("li", { class: "empty", text: "No named groups in this range yet." })]));
+    const mapped = top.filter(([a]) => actorMeta(a)).length;
+    $("flowActorsNote").textContent = top.length
+      ? `Claims and incidents naming a group, last ${fx.range.label}. ${mapped} of ${top.length} link to a MITRE ATT&CK profile.`
+      : "";
+  }
+
+  function velocitySeries(themeId, bins) {
+    const now = Date.now(), from = now - rangeMs(), size = rangeMs() / bins, per = new Array(bins).fill(0);
+    const daily = fx.range.days > 7 && fx.hist && fx.hist.daily && fx.hist.daily[themeId];
+    if (daily) {
+      for (const [d, n] of Object.entries(daily)) { const t = Date.parse(d + "T12:00:00Z"); if (t >= from && t <= now) per[Math.min(bins - 1, Math.floor((t - from) / size))] += n; }
+    } else {
+      for (const it of fx.items) if (it.theme === themeId) per[Math.min(bins - 1, Math.floor((it._t - from) / size))]++;
+    }
+    return per;
+  }
+
+  function renderVelocity() {
+    const bins = fx.range.days === 2 ? 12 : fx.range.days, unit = fx.range.days === 2 ? "4 hours" : "day";
+    const rows = [["cve", "New high/critical CVEs"], ["kev", "Added to CISA's exploited list"]];
+    const W = Math.max(260, $("flowVelocity").clientWidth || 520), rowH = 64, padL = 4, padR = 4, H = rows.length * (rowH + 28);
+    const svg = s("svg", { viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": `Vulnerabilities per ${unit}, last ${fx.range.label}` });
+    rows.forEach(([id, label], r) => {
+      const per = velocitySeries(id, bins), max = Math.max(1, ...per), total = per.reduce((a, b) => a + b, 0);
+      const y0 = r * (rowH + 28) + 18, bw = (W - padL - padR) / bins;
+      svg.append(s("text", { x: padL, y: y0 - 5, "font-size": 12, fill: "#dfe7f5", "font-weight": 600, text: label }));
+      svg.append(s("text", { x: W - padR, y: y0 - 5, "font-size": 11.5, fill: "#8fa1bf", "text-anchor": "end",
+        text: total ? `${total.toLocaleString()} total · peak ${max.toLocaleString()} per ${unit}` : "waiting for feed" }));
+      svg.append(s("line", { x1: padL, x2: W - padR, y1: y0 + rowH, y2: y0 + rowH, stroke: "#2a3b5e" }));
+      per.forEach((n, i) => {
+        if (!n) return;
+        const hgt = (n / max) * rowH;
+        const bar = s("rect", { x: padL + i * bw + bw * 0.12, y: y0 + rowH - hgt, width: Math.max(1, bw * 0.76), height: hgt, rx: 1, fill: colorOf(id) });
+        bar.append(s("title", { text: `${n} in this ${unit}` }));
+        svg.append(bar);
+      });
+    });
+    $("flowVelocity").replaceChildren(svg);
   }
 
   init();

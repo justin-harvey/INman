@@ -11,6 +11,8 @@ still build up a full history. NVD is backfilled for the whole window on the fir
 Sources and themes are configured in data/flow_sources.json.
 Environment: RL_ENABLED, RL_API_BASE, RL_API_KEY, RL_API_KEY_HEADER (see README),
 NVD_API_KEY (optional), GITHUB_TOKEN (optional, for the Upptime adapter),
+Also: claims seen on several trackers are merged (see corroborate), actors are matched to
+MITRE ATT&CK entries from site/data/attack_index.json, and data/watchlist.json sites are checked.
 FIXTURE_DIR (tests: read every source from local files).
 """
 import datetime as dt
@@ -18,8 +20,10 @@ import email.utils
 import hashlib
 import json
 import os
+import re
 import sys
 import urllib.parse
+import urllib.error
 import urllib.request
 import xml.etree.ElementTree as ET
 
@@ -75,11 +79,25 @@ def parse_time(value):
             return None
 
 
-def item(source, theme, key, when, title, severity, url):
-    return {"id": hashlib.sha1(f"{source}|{key}".encode()).hexdigest()[:14], "ts": iso(when),
-            "first_seen": iso(NOW), "theme": theme, "source": source,
-            "title": " ".join(str(title).split())[:180], "severity": round(max(0.0, min(1.0, severity)), 2),
-            "url": url if str(url).startswith(("https://", "http://")) else ""}
+def item(source, theme, key, when, title, severity, url, actor="", victim=""):
+    it = {"id": hashlib.sha1(f"{source}|{key}".encode()).hexdigest()[:14], "ts": iso(when),
+          "first_seen": iso(NOW), "theme": theme, "source": source,
+          "title": " ".join(str(title).split())[:180], "severity": round(max(0.0, min(1.0, severity)), 2),
+          "url": url if str(url).startswith(("https://", "http://")) else ""}
+    if actor and not str(actor).lower().startswith(("not ", "none", "unknown")):
+        it["actor"] = str(actor).strip()[:60]
+    if victim:
+        it["victim"] = str(victim).strip()[:120]
+    return it
+
+
+def norm(s):
+    """Lower-case, drop web suffixes and punctuation: used to match names across sources."""
+    s = str(s or "").lower()
+    s = re.sub(r"https?://|www\.", "", s)
+    s = re.sub(r"\.(com|org|net|gov|edu|us|io|co|info|biz)(\.[a-z]{2})?\b", " ", s)
+    s = re.sub(r"\b(inc|llc|ltd|corp|corporation|co|company|plc|group|the)\b", " ", s)
+    return re.sub(r"[^a-z0-9]+", "", s)
 
 
 def enabled(cfg):
@@ -98,7 +116,7 @@ def a_ransomwatch(cfg, since):
             continue
         title, group = p.get("post_title", ""), p.get("group_name", "")
         out.append(item("ransomwatch", cfg["theme"], f"{group}|{title}", t, f"{title} · claimed by {group} (global)", 0.55,
-                        "https://github.com/joshhighet/ransomwatch"))
+                        "https://github.com/joshhighet/ransomwatch", actor=group, victim=title))
     return out
 
 
@@ -114,7 +132,28 @@ def a_ransomware_live(cfg, since):
             continue
         out.append(item("ransomware.live", cfg["theme"], f"{v.get('group')}|{v['victim']}", t,
                         f"{v['victim']} · claimed by {v.get('group', 'unknown')} (U.S.)", 0.7,
-                        v.get("url") or "https://www.ransomware.live/"))
+                        v.get("url") or "https://www.ransomware.live/", actor=v.get("group", ""), victim=v["victim"]))
+    return out
+
+
+BACKFILL = {"nvd": False, "ransomlook": False}   # set by main(): True until history holds older items
+
+
+def a_ransomlook(cfg, since):
+    """RansomLook recent posts (CC BY 4.0, credit RansomLook). Global, like ransomwatch."""
+    days = max(1, (NOW - since).days) if BACKFILL["ransomlook"] else 7
+    data = json.loads(fetch(f"{cfg.get('url', 'https://www.ransomlook.io/api/posts')}?days={days}"))
+    if isinstance(data, dict):
+        data = next((v for v in data.values() if isinstance(v, list)), [])
+    out = []
+    for p in data:
+        t = parse_time(p.get("discovered"))
+        title, group = p.get("post_title", ""), p.get("group_name", "")
+        if not t or t < since or not title:
+            continue
+        out.append(item("RansomLook", cfg["theme"], f"{group}|{title}", t, f"{title} · claimed by {group} (global)", 0.55,
+                        f"https://www.ransomlook.io/group/{urllib.parse.quote(group)}" if group else "https://www.ransomlook.io/",
+                        actor=group, victim=title))
     return out
 
 
@@ -132,14 +171,11 @@ def a_cisa_kev(cfg, since):
     return out
 
 
-NVD_STATE = {"backfill": False}   # set by main(): True until the history holds older NVD items
-
-
 def a_nvd(cfg, since):
     """Last 7 days each run; the full history window (paged, rate-limit aware) until backfilled."""
     import time
     headers = {"apiKey": env("NVD_API_KEY")} if env("NVD_API_KEY") else {}
-    start = since if NVD_STATE["backfill"] else max(since, NOW - dt.timedelta(days=7))
+    start = since if BACKFILL["nvd"] else max(since, NOW - dt.timedelta(days=7))
     pause = 0 if env("FIXTURE_DIR") else (0.7 if headers else 6.5)   # NVD: 5 req/30s without a key, 50 with
     fmt = lambda d: d.strftime("%Y-%m-%dT%H:%M:%S.000+00:00")
     out, calls = [], 0
@@ -246,11 +282,124 @@ def a_inman(cfg, since):
             continue
         theme = cfg["theme_by_tier"].get(str(r["tier"]), "incidents")
         out.append(item("INman", theme, r["id"], t, f"{r['org']} · {r.get('incident_type', '')}", sev.get(r["tier"], 0.5),
-                        r.get("url", "")))
+                        r.get("url", ""), actor=re.sub(r"\s*\(.*?\)", "", r.get("actor", "")).strip("'\" "), victim=r["org"]))
     return out
 
 
-ADAPTERS = {"ransomwatch": a_ransomwatch, "ransomware_live": a_ransomware_live, "cisa_kev": a_cisa_kev,
+WATCH_STATE = os.path.join(ROOT, "data", "watch_state.json")
+WATCHLIST = os.path.join(ROOT, "data", "watchlist.json")
+
+
+def check_url(url):
+    """Return (up, detail). Connection errors, timeouts and 5xx count as down; 4xx (often bot
+    protection) counts as up. In tests the fixture holds the status code or 'timeout'."""
+    if env("FIXTURE_DIR"):
+        code = fetch(url).strip()
+        return (False, "timed out") if code == "timeout" else (int(code) < 500, f"HTTP {code}")
+    req = urllib.request.Request(url, method="GET", headers={"User-Agent": UA})
+    try:
+        with urllib.request.urlopen(req, timeout=20) as r:
+            return r.status < 500, f"HTTP {r.status}"
+    except urllib.error.HTTPError as e:
+        return e.code < 500, f"HTTP {e.code}"
+    except Exception as e:
+        return False, e.__class__.__name__
+
+
+def a_watchlist(cfg, since):
+    """Our own uptime checks: emit an item when a watched site goes down and when it recovers."""
+    sites = []
+    if os.path.exists(WATCHLIST):
+        with open(WATCHLIST) as f:
+            sites = json.load(f).get("sites", [])
+    if not sites:
+        raise LookupError("no sites in data/watchlist.json yet")
+    state = {}
+    if os.path.exists(WATCH_STATE):
+        with open(WATCH_STATE) as f:
+            state = json.load(f)
+    out = []
+    for site in sites:
+        name, url = site["name"], site["url"]
+        up, detail = check_url(url)
+        prev = state.get(url, {"up": True, "since": iso(NOW)})
+        if prev["up"] and not up:
+            out.append(item("Watchlist", cfg["theme"], f"{url}|down|{iso(NOW)}", NOW, f"{name} is down ({detail})", 0.6, url))
+            state[url] = {"up": False, "since": iso(NOW), "detail": detail}
+        elif not prev["up"] and up:
+            mins = int((NOW - parse_time(prev["since"])).total_seconds() // 60)
+            span = f"{mins // 60}h {mins % 60}m" if mins >= 60 else f"{mins}m"
+            out.append(item("Watchlist", cfg["theme"], f"{url}|up|{iso(NOW)}", NOW, f"{name} is back up after {span}", 0.25, url))
+            state[url] = {"up": True, "since": iso(NOW)}
+        else:
+            state.setdefault(url, prev)
+    with open(WATCH_STATE, "w") as f:
+        json.dump(state, f, indent=1, sort_keys=True)
+    return out
+
+
+ATTACK_INDEX = os.path.join(ROOT, "site", "data", "attack_index.json")
+ACTOR_ALIASES = os.path.join(ROOT, "data", "actor_aliases.json")
+
+
+def attack_lookup():
+    """Map normalized actor names to MITRE ATT&CK groups/software (built weekly by attack_index.py)."""
+    if not os.path.exists(ATTACK_INDEX):
+        return lambda actor: None
+    with open(ATTACK_INDEX) as f:
+        entries = json.load(f).get("entries", [])
+    table = {}
+    for e in entries:
+        for name in [e["name"], *e.get("aliases", [])]:
+            table.setdefault(norm(name), e)
+    aliases = {}
+    if os.path.exists(ACTOR_ALIASES):
+        with open(ACTOR_ALIASES) as f:
+            aliases = {norm(k): norm(v) for k, v in json.load(f).get("aliases", {}).items()}
+
+    def find(actor):
+        n = norm(actor)
+        for key in (aliases.get(n, n), n, re.sub(r"(ransomware|team|group|gang|leaks?|\d+)$", "", n)):
+            if key and key in table:
+                e = table[key]
+                return {"id": e["id"], "name": e["name"], "type": e["type"], "url": e["url"]}
+        return None
+    return find
+
+
+def corroborate(items):
+    """Merge claims about the same victim seen on several trackers (within 4 days) into one item.
+    The survivor lists every source in `seen_on` and gains severity. Returns the merged dict."""
+    claims = sorted((i for i in items.values() if i["theme"] == "claims" and i.get("victim")), key=lambda i: i["ts"])
+    groups = {}
+    for it in claims:
+        key = norm(it["victim"])
+        if not key:
+            continue
+        bucket = groups.setdefault(key, [])
+        for g in bucket:
+            if abs((parse_time(g[0]["ts"]) - parse_time(it["ts"])).days) <= 4:
+                g.append(it)
+                break
+        else:
+            bucket.append([it])
+    for bucket in groups.values():
+        for g in bucket:
+            sources = sorted({x["source"] for x in g} | {s for x in g for s in x.get("seen_on", [])})
+            if len(sources) < 2:
+                continue
+            keep = g[0]
+            keep["seen_on"] = sources
+            keep["severity"] = round(min(1.0, max(x["severity"] for x in g) + 0.1 * (len(sources) - 1)), 2)
+            if not keep.get("actor"):
+                keep["actor"] = next((x["actor"] for x in g if x.get("actor")), "")
+            for x in g[1:]:
+                items.pop(x["id"], None)
+    return items
+
+
+ADAPTERS = {"ransomwatch": a_ransomwatch, "ransomware_live": a_ransomware_live, "ransomlook": a_ransomlook,
+            "watchlist": a_watchlist, "cisa_kev": a_cisa_kev,
             "nvd": a_nvd, "statuspages": a_statuspages, "upptime": a_upptime, "rss": a_rss, "inman": a_inman}
 
 
@@ -277,8 +426,9 @@ def main():
     prev_hist = load(HISTORY)
     prev_items = {i["id"]: i for i in prev_hist.get("items", [])}
     prev_items.update(prev_live)
-    NVD_STATE["backfill"] = not any(i["source"] == "NVD" and parse_time(i["ts"]) < NOW - dt.timedelta(days=8)
-                                    for i in prev_items.values())
+    for key, src in (("nvd", "NVD"), ("ransomlook", "RansomLook")):
+        BACKFILL[key] = not any(i["source"] == src and parse_time(i["ts"]) < NOW - dt.timedelta(days=8)
+                                for i in prev_items.values())
 
     fetched, status = {}, {}
     for name, cfg in conf["sources"].items():
@@ -292,6 +442,8 @@ def main():
                     it["first_seen"] = prev_items[it["id"]]["first_seen"]
                 fetched[it["id"]] = it
             status[name] = f"ok ({len(got)})"
+        except LookupError as e:          # nothing configured yet (e.g. an empty watchlist)
+            status[name] = f"idle: {e}"
         except Exception as e:
             status[name] = f"error: {e.__class__.__name__}: {str(e)[:120]}"
 
@@ -302,15 +454,42 @@ def main():
         if pid not in known and parse_time(it["ts"]) >= hist_since:
             known[pid] = it
 
+    # actors: one display name per spelling ("qilin", "Qilin" -> "Qilin"), then their MITRE ATT&CK match
+    find = attack_lookup()
+    canon = {}
+    for it in sorted(known.values(), key=lambda i: i["ts"]):
+        a = it.get("actor")
+        if a:
+            k = norm(a)
+            if k not in canon or (canon[k].islower() and not a.islower()):
+                canon[k] = a
+    for it in list(known.values()) + list(fetched.values()):
+        if it.get("actor"):
+            it["actor"] = canon.get(norm(it["actor"]), it["actor"])
+    corroborate(known)
+    for pid in list(fetched):
+        if pid not in known:
+            fetched.pop(pid)
+
+    actor_meta = {}
+    for it in known.values():
+        a = it.get("actor")
+        if a and a not in actor_meta:
+            actor_meta[a] = find(a)
+
     # live file: every item from the last `window_days`
     live = sorted((i for i in known.values() if parse_time(i["ts"]) >= live_since), key=lambda i: i["ts"], reverse=True)
     live = live[: int(conf.get("max_items", 2000))]
 
     # history file: true daily counts per theme + the most severe items per theme per day
     counts = {}
-    for it in list(fetched.values()) + list(prev_live.values()):
+    for it in list(fetched.values()) + [i for i in prev_live.values() if i["id"] in known]:
         if parse_time(it["ts"]) >= hist_since:
             counts.setdefault(it["theme"], {}).setdefault(day_of(it), set()).add(it["id"])
+    actor_counts = {}
+    for it in list(fetched.values()) + [i for i in prev_live.values() if i["id"] in known]:
+        if it.get("actor") and parse_time(it["ts"]) >= hist_since:
+            actor_counts.setdefault(it["actor"], {}).setdefault(day_of(it), set()).add(it["id"])
     daily = {}
     first_day = hist_since.date().isoformat()
     for th in conf["themes"]:
@@ -318,6 +497,20 @@ def main():
         new = {d: len(ids) for d, ids in counts.get(th["id"], {}).items()}
         merged = {d: max(old.get(d, 0), new.get(d, 0)) for d in set(old) | set(new) if d >= first_day}
         daily[th["id"]] = dict(sorted(merged.items()))
+    prev_actors = {}
+    for a, days in prev_hist.get("actors_daily", {}).items():
+        merged_prev = prev_actors.setdefault(canon.get(norm(a), a), {})
+        for d, n in days.items():
+            merged_prev[d] = max(merged_prev.get(d, 0), n)
+    actors_daily = {}
+    for actor in set(actor_counts) | set(prev_actors):
+        old = prev_actors.get(actor, {})
+        new = {d: len(ids) for d, ids in actor_counts.get(actor, {}).items()}
+        merged = {d: max(old.get(d, 0), new.get(d, 0)) for d in set(old) | set(new) if d >= first_day}
+        if merged:
+            actors_daily[actor] = dict(sorted(merged.items()))
+            if actor not in actor_meta:
+                actor_meta[actor] = find(actor)
     buckets = {}
     for it in known.values():
         buckets.setdefault((it["theme"], day_of(it)), []).append(it)
@@ -328,10 +521,12 @@ def main():
     hist_items.sort(key=lambda i: i["ts"], reverse=True)
 
     os.makedirs(os.path.dirname(OUT), exist_ok=True)
+    actors = {a: m for a, m in sorted(actor_meta.items())}
     write(OUT, {"generated_at": iso(NOW), "window_days": live_days, "history_days": hist_days,
-                "themes": conf["themes"], "sources": status, "items": live})
+                "themes": conf["themes"], "sources": status, "actors": actors, "items": live})
     write(HISTORY, {"generated_at": iso(NOW), "history_days": hist_days, "items_per_theme_day": per_day,
-                    "themes": conf["themes"], "daily": daily, "items": hist_items})
+                    "themes": conf["themes"], "daily": daily, "actors_daily": actors_daily, "actors": actors,
+                    "items": hist_items})
     for k, v in status.items():
         print(f"{k}: {v}")
     print(f"live items: {len(live)} · history items: {len(hist_items)}")
