@@ -1,1 +1,7 @@
-{"label": "Global leak-site posts per day (all countries)", "source": "ransomwatch (public domain)", "by_day": {}}
+{
+ "label": "Global leak-site posts per day (all countries)",
+ "source": "ransomwatch (public domain)",
+ "source_url": "https://github.com/joshhighet/ransomwatch",
+ "latest_post_date": null,
+ "by_day": {}
+}

@@ -1,1 +1,15 @@
-{"updated_at": null, "feeds": {"note": "feeds have not run yet; the scheduled GitHub Action fills this in"}, "total": 187}
+{
+ "updated_at": "2026-11-22T18:01:00+00:00",
+ "feeds": {
+  "ransomware.live": "skipped (RL_ENABLED is not true; see README licensing note)",
+  "ransomwatch": "stale (latest post None), 0 posts in window",
+  "overrides": "0 applied"
+ },
+ "total": 187,
+ "by_tier": {
+  "1": 124,
+  "2": 25,
+  "3": 26,
+  "4": 12
+ }
+}
