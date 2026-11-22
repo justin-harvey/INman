@@ -1,0 +1,37 @@
+{
+ "_how_to": "Sources feeding the live orb. Each theme is one sector of the orb. Turn a source off with \"enabled\": false. Every source here is public; check the terms note before adding new ones.",
+ "window_days": 7,
+ "max_items": 2000,
+ "themes": [
+  {"id": "claims", "label": "Extortion claims", "color": "#ff6b4a"},
+  {"id": "kev", "label": "Exploited vulnerabilities", "color": "#ffb020"},
+  {"id": "cve", "label": "New high/critical CVEs", "color": "#e9e45b"},
+  {"id": "outages", "label": "Outages & service health", "color": "#9db4d6"},
+  {"id": "advisories", "label": "Advisories & news", "color": "#4fc3f7"},
+  {"id": "incidents", "label": "Confirmed U.S. incidents", "color": "#ef4f6a"}
+ ],
+ "sources": {
+  "ransomwatch": {"enabled": true, "theme": "claims", "url": "https://raw.githubusercontent.com/joshhighet/ransomwatch/main/posts.json",
+                  "terms": "Unlicense (public domain). Global posts, no country field."},
+  "ransomware_live": {"enabled": "env:RL_ENABLED", "theme": "claims",
+                      "terms": "Non-commercial use free with attribution; commercial use needs written approval. Off until cleared."},
+  "cisa_kev": {"enabled": true, "theme": "kev", "url": "https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json",
+               "terms": "U.S. government public data. Attribute CISA."},
+  "nvd": {"enabled": true, "theme": "cve", "severities": ["CRITICAL", "HIGH"],
+          "terms": "Public API; 5 requests/30s without a key, 50 with NVD_API_KEY. NVD asks for its notice: 'This product uses the NVD API but is not endorsed or certified by the NVD.'"},
+  "statuspages": {"enabled": true, "theme": "outages",
+                  "pages": {"GitHub": "https://www.githubstatus.com", "Cloudflare": "https://www.cloudflarestatus.com",
+                            "Atlassian": "https://status.atlassian.com", "Twilio": "https://status.twilio.com",
+                            "Zoom": "https://status.zoom.us"},
+                  "terms": "Public Atlassian Statuspage endpoints (/api/v2/incidents.json). Confirm each page still uses Statuspage."},
+  "upptime": {"enabled": false, "theme": "outages", "repo": "OWNER/your-upptime-repo", "label": "status",
+              "terms": "Your own Upptime repo; downtime issues are read from the GitHub API. Check which label your Upptime repo puts on downtime issues."},
+  "rss": {"enabled": true, "theme": "advisories",
+          "feeds": {"CISA advisories": "https://www.cisa.gov/cybersecurity-advisories/all.xml",
+                    "BleepingComputer": "https://www.bleepingcomputer.com/feed/",
+                    "The Record": "https://therecord.media/feed"},
+          "terms": "Headlines and links only; no article text is stored."},
+  "inman": {"enabled": true, "theme_by_tier": {"1": "incidents", "2": "claims", "3": "outages", "4": "outages"},
+            "terms": "This repo's own curated incidents."}
+ }
+}

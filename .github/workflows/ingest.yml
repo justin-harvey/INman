@@ -34,6 +34,16 @@ jobs:
           RL_API_KEY: ${{ secrets.RL_API_KEY }}
         run: python scripts/ingest.py
 
+      - name: Build live flow (orb)
+        env:
+          RL_ENABLED: ${{ vars.RL_ENABLED }}
+          RL_API_BASE: ${{ vars.RL_API_BASE }}
+          RL_API_KEY_HEADER: ${{ vars.RL_API_KEY_HEADER }}
+          RL_API_KEY: ${{ secrets.RL_API_KEY }}
+          NVD_API_KEY: ${{ secrets.NVD_API_KEY }}       # optional; raises NVD rate limits
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}     # used only by the optional Upptime adapter
+        run: python scripts/flow.py
+
       - name: Commit changes
         run: |
           if git diff --quiet -- site/data; then

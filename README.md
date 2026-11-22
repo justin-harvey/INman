@@ -31,12 +31,16 @@ site/                 the dashboard (Netlify publishes this folder)
   data/events.json    anchor events shown as flags
   data/context.json   global leak-site posts per day (written by ingest)
   data/meta.json      last update time + feed status (written by ingest)
+  data/flow.json      last week of live items for the orb (written by flow.py)
+  flow.js             the orb
 scripts/
   ingest.py           pulls feeds, dedupes, applies overrides
+  flow.py             builds the orb's live flow from data/flow_sources.json
   xlsx_to_json.py     converts the analyst workbook into incidents.json
   check_data.py       Netlify build gate: refuses malformed data
   schema.py           shared field list, tiers, validation
 data/overrides.json   analyst corrections and tier promotions
+data/flow_sources.json  orb themes and sources
 tests/                offline tests (run in CI before every ingest)
 .github/workflows/ingest.yml   runs every 30 minutes
 netlify.toml          publish settings + security headers
@@ -64,6 +68,23 @@ The workflow runs every 30 minutes (GitHub can delay scheduled runs at busy time
 - Optional secret `RL_API_KEY` and variable `RL_API_KEY_HEADER` (default `X-API-KEY`). Confirm the header name in their API docs.
 
 The adapter calls `/countryvictims/US` and keeps claims from the last 30 days (`LOOKBACK_DAYS`). It skips any organization already in the data, after normalizing names.
+
+## Live threat flow (the orb)
+
+The top of the dashboard is an orb of everything the feeds brought in over the past week. Each sector is one theme. New items stream in from their source lane and land at the rim; items sink toward the core as they age. Click a theme card to focus it, hover a point for details, click it to open the source. The page re-checks `data/flow.json` every 5 minutes and animates anything new.
+
+`scripts/flow.py` builds `site/data/flow.json` on the same 30-minute schedule. Sources and themes live in `data/flow_sources.json`; turn any source off with `"enabled": false`.
+
+| Theme | Sources (default) | Terms |
+| --- | --- | --- |
+| Extortion claims | ransomwatch (global, on); ransomware.live (U.S., off until licensing is cleared) | Unlicense; ransomware.live terms above |
+| Exploited vulnerabilities | CISA Known Exploited Vulnerabilities feed | U.S. government public data |
+| New high/critical CVEs | NVD CVE API 2.0 (optional secret `NVD_API_KEY` raises the rate limit) | Public API. Show NVD's notice: "This product uses the NVD API but is not endorsed or certified by the NVD." |
+| Outages & service health | Public Statuspage pages (GitHub, Cloudflare, Atlassian, Twilio, Zoom); your own Upptime repo (off; set `repo` and check which label your Upptime repo puts on downtime issues) | Public status pages |
+| Advisories & news | CISA advisories, BleepingComputer and The Record RSS (headlines and links only) | Headlines only |
+| Confirmed U.S. incidents | This repo's curated incidents (claims and outages go to their own sectors) | — |
+
+Items persist for `window_days` (default 7) even after they drop out of a short feed such as RSS. A source that fails is shown as such on the dashboard and does not erase the others.
 
 ## Analyst workflow
 

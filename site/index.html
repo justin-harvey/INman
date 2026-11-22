@@ -8,6 +8,7 @@
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="styles.css">
 <script src="app.js" defer></script>
+<script src="flow.js" defer></script>
 </head>
 <body>
 <header class="top">
@@ -19,6 +20,23 @@
 </header>
 
 <main>
+  <section class="flow-card" id="flowCard" aria-label="Live threat flow">
+    <div class="flow-head">
+      <div>
+        <h2>Live threat flow</h2>
+        <p>Everything the feeds brought in over the past week. New items stream in from their source and land at the rim; older items sink toward the core. Each sector is one theme.</p>
+      </div>
+      <div class="flow-actions"><span id="flowUpdated"></span><button id="flowReplay" type="button">Replay last 48h</button></div>
+    </div>
+    <div class="flow-body">
+      <div class="orb-wrap"><canvas id="orb" role="img" aria-label="Orb of incoming threat items by theme"></canvas></div>
+      <aside class="ticker"><h3>Latest inflow</h3><ul id="flowTicker"></ul></aside>
+    </div>
+    <div class="themes" id="flowThemes" role="group" aria-label="Themes: click to focus"></div>
+    <p class="flow-sources" id="flowSourceList"></p>
+    <p class="flow-sources">Uses data from CISA's Known Exploited Vulnerabilities catalog and ransomwatch. This product uses the NVD API but is not endorsed or certified by the NVD.</p>
+  </section>
+
   <section class="controls" aria-label="Filters">
     <div class="seg" role="group" aria-label="Sector">
       <button data-group="All" class="on">All</button>
