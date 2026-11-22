@@ -13,8 +13,8 @@
   {"id": "incidents", "label": "Confirmed U.S. incidents", "short": "U.S. incidents", "color": "#ef4f6a"}
  ],
  "sources": {
-  "ransomwatch": {"enabled": true, "theme": "claims", "url": "https://raw.githubusercontent.com/joshhighet/ransomwatch/main/posts.json",
-                  "terms": "Unlicense (public domain). Global posts, no country field."},
+  "ransomwatch": {"enabled": false, "theme": "claims", "url": "https://raw.githubusercontent.com/joshhighet/ransomwatch/main/posts.json",
+                  "terms": "Unlicense (public domain). Off: its posts.json stopped updating (0 posts in the window on Nov 22, 2026). Re-enable if it resumes."},
   "ransomlook": {"enabled": true, "theme": "claims", "url": "https://www.ransomlook.io/api/posts",
                  "terms": "CC BY 4.0: free to use, including commercially, with credit to RansomLook. Global posts."},
   "ransomware_live": {"enabled": "env:RL_ENABLED", "theme": "claims",

@@ -59,7 +59,7 @@ The workflow runs every 30 minutes (GitHub can delay scheduled runs at busy time
 
 | Feed | Default | What it does |
 | --- | --- | --- |
-| ransomwatch | On | Counts global leak-site posts per day for the context line. Public domain. Its posts carry no country, so they never become U.S. incidents. Check that its `posts.json` is still being updated; meta.json flags it as `stale` if the newest post is over 7 days old. |
+| Global leak-site posts (context line) | On | Counts global leak-site posts per day from RansomLook (CC BY 4.0), falling back to ransomwatch. These posts carry no country, so they never become U.S. incidents. meta.json flags the line as `stale` if the newest post is over 7 days old. |
 | ransomware.live | **Off** | Adds U.S. leak-site claims as Tier 2. |
 
 **Licensing gate for ransomware.live.** Its terms allow free non-commercial use with attribution. Commercial use needs written approval from its owner, and the terms also bar republishing raw data and dashboards that copy its look. Get approval (or confirm your use is non-commercial) before enabling it. Then set, under **Settings → Secrets and variables → Actions**:
@@ -79,11 +79,11 @@ The top of the dashboard is an orb of everything the feeds brought in. Each sect
 - `site/data/flow.json`: every item from the last 7 days (48-hour and 1-week views, live polling).
 - `site/data/flow_history.json`: 90 days of exact daily counts per theme, plus the 12 most severe items per theme per day (30/60/90-day views; loaded only when picked). Change `history_days` and `history_items_per_theme_day` in `data/flow_sources.json`.
 
-History builds up from the first scheduled run for feeds that only publish recent items (RSS, status pages). ransomwatch, CISA KEV and the curated incidents fill the full 90 days at once, and NVD is backfilled for the whole window on the first run (slowly, to respect its rate limit; add `NVD_API_KEY` to speed it up). Sources and themes live in `data/flow_sources.json`; turn any source off with `"enabled": false`.
+History builds up from the first scheduled run for feeds that only publish recent items (RSS, status pages). RansomLook, CISA KEV and the curated incidents fill the full 90 days at once, and NVD is backfilled for the whole window on the first run (slowly, to respect its rate limit; add `NVD_API_KEY` to speed it up). Sources and themes live in `data/flow_sources.json`; turn any source off with `"enabled": false`.
 
 | Theme | Sources (default) | Terms |
 | --- | --- | --- |
-| Extortion claims | ransomwatch and RansomLook (global, on); ransomware.live (U.S., off until licensing is cleared) | ransomwatch: Unlicense. RansomLook: CC BY 4.0, credit shown on the dashboard. ransomware.live: terms above |
+| Extortion claims | RansomLook (global, on); ransomwatch (off: its feed stopped updating; re-enable if it resumes); ransomware.live (U.S., off until licensing is cleared) | RansomLook: CC BY 4.0, credit shown on the dashboard. ransomwatch: Unlicense. ransomware.live: terms above |
 | Exploited vulnerabilities | CISA Known Exploited Vulnerabilities feed | U.S. government public data |
 | New high/critical CVEs | NVD CVE API 2.0 (optional secret `NVD_API_KEY` raises the rate limit) | Public API. Show NVD's notice: "This product uses the NVD API but is not endorsed or certified by the NVD." |
 | Outages & service health | Public Statuspage pages (GitHub, Cloudflare, Atlassian, Twilio, Zoom); the built-in **site watchlist** (`data/watchlist.json`, empty until you add sites); optionally your own Upptime repo (off) | Public status pages |
@@ -92,7 +92,7 @@ History builds up from the first scheduled run for feeds that only publish recen
 
 **Corroborated claims.** When the same victim appears on more than one tracker within 4 days, the claims merge into one point with a white ring, a "seen on" list and a higher severity. Ransomware groups do post false claims, so a second tracker is a useful (not conclusive) signal.
 
-**Most active groups.** Claims and curated incidents that name a group are counted for the chosen range. Groups that match a MITRE ATT&CK® group or software entry link to its profile. `scripts/attack_index.py` rebuilds `site/data/attack_index.json` from MITRE's public STIX data once a week; when a tracker spells a group differently from ATT&CK (for example `alphv` for BlackCat), add the pair to `data/actor_aliases.json`. MITRE ATT&CK content © The MITRE Corporation, used under the [ATT&CK Terms of Use](https://attack.mitre.org/resources/legal-and-branding/terms-of-use/).
+**Most active groups.** Claims and curated incidents that name a group are counted for the chosen range. Groups that match a MITRE ATT&CK® group or software entry link to its profile. `scripts/attack_index.py` rebuilds `site/data/attack_index.json` from MITRE's public STIX data once a week; automatic matches are accepted only when the ATT&CK entry describes ransomware, extortion or cybercrime, so a leak-site group that shares a name with an unrelated espionage tool is not linked. When a tracker spells a group differently from ATT&CK (for example `alphv` for BlackCat), add the pair to `data/actor_aliases.json`; listed pairs always match. MITRE ATT&CK content © The MITRE Corporation, used under the [ATT&CK Terms of Use](https://attack.mitre.org/resources/legal-and-branding/terms-of-use/).
 
 **Vulnerability velocity.** New high/critical CVEs and additions to CISA's exploited list, per day (per 4 hours for 48 hours), for the chosen range.
 

@@ -98,6 +98,15 @@ class IngestTests(unittest.TestCase):
         self.ingest.main()  # second run adds nothing
         self.assertEqual(len(self._load()), self.before + 1)
 
+    def test_context_prefers_ransomlook(self):
+        today = dt.datetime.now(dt.timezone.utc).date()
+        with open(os.path.join(os.environ["FIXTURE_DIR"], "ransomlook_posts.json"), "w") as f:
+            json.dump([{"post_title": "x", "group_name": "g", "discovered": today.isoformat() + " 01:00:00"}] * 3, f)
+        self.ingest.main()
+        ctx = self._load("context.json")
+        self.assertEqual(sum(ctx["by_day"].values()), 3)
+        self.assertTrue(ctx["source"].startswith("RansomLook"))
+
     def test_context_counts(self):
         self.ingest.main()
         ctx = self._load("context.json")

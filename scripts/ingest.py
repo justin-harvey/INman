@@ -115,8 +115,16 @@ def ransomware_live(existing_keys):
 
 
 def ransomwatch_context():
-    url = env("RANSOMWATCH_URL", "https://raw.githubusercontent.com/joshhighet/ransomwatch/main/posts.json")
-    posts = fetch_json(url, fixture="ransomwatch_posts.json")
+    """Global leak-site posts per day. RansomLook first (CC BY 4.0, current); ransomwatch as fallback."""
+    try:
+        posts = fetch_json("https://www.ransomlook.io/api/posts?days=120", fixture="ransomlook_posts.json")
+        if isinstance(posts, dict):
+            posts = next((v for v in posts.values() if isinstance(v, list)), [])
+        source, source_url = "RansomLook (CC BY 4.0)", "https://www.ransomlook.io/"
+    except Exception:
+        url = env("RANSOMWATCH_URL", "https://raw.githubusercontent.com/joshhighet/ransomwatch/main/posts.json")
+        posts = fetch_json(url, fixture="ransomwatch_posts.json")
+        source, source_url = "ransomwatch (public domain)", "https://github.com/joshhighet/ransomwatch"
     since = TODAY - dt.timedelta(days=120)
     days = Counter()
     for p in posts:
@@ -125,7 +133,7 @@ def ransomwatch_context():
             days[d.isoformat()] += 1
     latest = max(days) if days else None
     ctx = {"label": "Global leak-site posts per day (all countries)",
-           "source": "ransomwatch (public domain)", "source_url": "https://github.com/joshhighet/ransomwatch",
+           "source": source, "source_url": source_url,
            "latest_post_date": latest, "by_day": dict(sorted(days.items()))}
     stale = latest is None or (TODAY - dt.date.fromisoformat(latest)).days > 7
     return ctx, ("ok" if not stale else f"stale (latest post {latest})") + f", {sum(days.values())} posts in window"

@@ -31,7 +31,10 @@ class FlowTests(unittest.TestCase):
         shutil.copy(os.path.join(ROOT, "scripts", "attack_index.py"), os.path.join(self.tmp, "scripts"))
         os.environ["FIXTURE_DIR"] = os.path.join(self.tmp, "fx")
         self.flow = load_flow(self.tmp)
-        self.conf = json.load(open(os.path.join(self.tmp, "data", "flow_sources.json")))
+        cfg_path = os.path.join(self.tmp, "data", "flow_sources.json")
+        self.conf = json.load(open(cfg_path))
+        self.conf["sources"]["ransomwatch"]["enabled"] = True       # off in production (stale feed); keep testing the adapter
+        json.dump(self.conf, open(cfg_path, "w"))
         self._fixtures()
 
     def tearDown(self):
@@ -127,9 +130,31 @@ class FlowTests(unittest.TestCase):
         sys.argv = ["attack_index.py", "--bundle", bpath]
         mod.main()
         doc = self.run_flow()
-        self.assertEqual(doc["actors"]["lockbit3"]["id"], "S1202")      # via data/actor_aliases.json
+        self.assertEqual(doc["actors"]["LockBit 3.0"]["id"], "S1202")   # via data/actor_aliases.json, shown by its ATT&CK name
+        self.assertNotIn("lockbit3", doc["actors"])
         self.assertIsNone(doc["actors"]["Qilin"])                         # revoked entries are skipped
         self.assertNotIn("qilin", doc["actors"])                          # spelling variants share one name
+
+    def test_attack_rejects_unrelated_namesakes(self):
+        bundle = {"objects": [
+            {"type": "malware", "name": "Hydraq", "x_mitre_aliases": ["Aurora"], "description": "[Hydraq](https://x) is a data-theft trojan used by an espionage group.",
+             "external_references": [{"source_name": "mitre-attack", "external_id": "S0203"}]},
+            {"type": "intrusion-set", "name": "Qilin", "description": "Qilin is a ransomware-as-a-service operation.",
+             "external_references": [{"source_name": "mitre-attack", "external_id": "G9001"}]}]}
+        bpath = os.path.join(self.tmp, "bundle.json")
+        json.dump(bundle, open(bpath, "w"))
+        spec = importlib.util.spec_from_file_location("attack_idx2", os.path.join(self.tmp, "scripts", "attack_index.py"))
+        mod = importlib.util.module_from_spec(spec); spec.loader.exec_module(mod)
+        sys.argv = ["attack_index.py", "--bundle", bpath]
+        mod.main()
+        with open(os.path.join(self.tmp, "site", "data", "attack_index.json")) as f:
+            self.assertNotIn("](", json.load(f)["entries"][0]["summary"])   # markdown links stripped
+        self.put(self.conf["sources"]["ransomlook"]["url"], [
+            {"post_title": "victim-a.example", "group_name": "aurora", "discovered": dt.datetime.now(dt.timezone.utc).strftime("%Y-%m-%d %H:%M:%S")},
+            {"post_title": "victim-b.example", "group_name": "qilin", "discovered": dt.datetime.now(dt.timezone.utc).strftime("%Y-%m-%d %H:%M:%S")}])
+        doc = self.run_flow()
+        self.assertIsNone(doc["actors"]["Aurora"])                  # espionage namesake, not linked; name capitalised
+        self.assertEqual(doc["actors"]["Qilin"]["id"], "G9001")
 
     def test_watchlist_reports_down_then_up(self):
         doc = self.run_flow()

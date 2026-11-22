@@ -8,6 +8,7 @@ MITRE ATT&CK® is a registered trademark of The MITRE Corporation. ATT&CK conten
 ATT&CK Terms of Use: https://attack.mitre.org/resources/legal-and-branding/terms-of-use/
 """
 import argparse
+import re
 import datetime as dt
 import json
 import os
@@ -17,6 +18,7 @@ import urllib.request
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 OUT = os.path.join(ROOT, "site", "data", "attack_index.json")
 BUNDLE = "https://raw.githubusercontent.com/mitre-attack/attack-stix-data/master/enterprise-attack/enterprise-attack.json"
+VERSION = 2
 NOTICE = ("MITRE ATT&CK® content © The MITRE Corporation. Used under the ATT&CK Terms of Use, which grant a "
           "non-exclusive, royalty-free license and require MITRE's copyright designation and license to be "
           "reproduced: https://attack.mitre.org/resources/legal-and-branding/terms-of-use/")
@@ -31,7 +33,7 @@ def build(bundle):
         if not ref or not ref.get("external_id"):
             continue
         aliases = sorted({*o.get("aliases", []), *o.get("x_mitre_aliases", [])} - {o["name"]})
-        desc = (o.get("description") or "").split("(Citation")[0].strip()
+        desc = re.sub(r"\[([^\]]+)\]\([^)]+\)", r"\1", (o.get("description") or "").split("(Citation")[0]).strip()
         first = desc.split(". ")[0].strip().rstrip(".")
         entries.append({"id": ref["external_id"], "name": o["name"], "aliases": aliases,
                         "type": "group" if o["type"] == "intrusion-set" else "software",
@@ -49,7 +51,9 @@ def main():
     if os.path.exists(OUT) and not a.bundle:
         with open(OUT) as f:
             built = json.load(f).get("built_at")
-        if built and (dt.datetime.now(dt.timezone.utc) - dt.datetime.fromisoformat(built)).days < a.max_age_days:
+        with open(OUT) as f:
+            version = json.load(f).get("version")
+        if built and version == VERSION and (dt.datetime.now(dt.timezone.utc) - dt.datetime.fromisoformat(built)).days < a.max_age_days:
             print(f"attack_index.json is fresh (built {built}); skipping")
             return
     if a.bundle:
@@ -62,7 +66,7 @@ def main():
     entries = build(bundle)
     os.makedirs(os.path.dirname(OUT), exist_ok=True)
     with open(OUT, "w", encoding="utf-8") as f:
-        json.dump({"built_at": dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds"), "source": BUNDLE,
+        json.dump({"version": VERSION, "built_at": dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds"), "source": BUNDLE,
                    "notice": NOTICE, "entries": entries}, f, separators=(",", ":"), ensure_ascii=False)
         f.write("\n")
     print(f"attack_index.json: {len(entries)} groups and software")

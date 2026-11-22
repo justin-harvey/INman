@@ -352,16 +352,21 @@ def attack_lookup():
     for e in entries:
         for name in [e["name"], *e.get("aliases", [])]:
             table.setdefault(norm(name), e)
+    crime = re.compile(r"ransomware|extortion|cyber ?crim|financially motivated|data leak|leak site", re.I)
     aliases = {}
     if os.path.exists(ACTOR_ALIASES):
         with open(ACTOR_ALIASES) as f:
             aliases = {norm(k): norm(v) for k, v in json.load(f).get("aliases", {}).items()}
 
     def find(actor):
+        """Explicit aliases always match. Automatic name matches must describe ransomware, extortion or
+        cybercrime, so that a leak-site group called "Aurora" is not linked to an unrelated espionage tool."""
         n = norm(actor)
-        for key in (aliases.get(n, n), n, re.sub(r"(ransomware|team|group|gang|leaks?|\d+)$", "", n)):
-            if key and key in table:
-                e = table[key]
+        candidates = [(aliases[n], True)] if n in aliases else []
+        candidates += [(n, False), (re.sub(r"(ransomware|team|group|gang|leaks?|\d+)$", "", n), False)]
+        for key, explicit in candidates:
+            e = table.get(key) if key else None
+            if e and (explicit or crime.search(e.get("summary", ""))):
                 return {"id": e["id"], "name": e["name"], "type": e["type"], "url": e["url"]}
         return None
     return find
@@ -463,6 +468,9 @@ def main():
             k = norm(a)
             if k not in canon or (canon[k].islower() and not a.islower()):
                 canon[k] = a
+    for k, name in canon.items():       # prefer ATT&CK's spelling; otherwise capitalise all-lowercase names
+        m = find(name)
+        canon[k] = m["name"] if m else (name[:1].upper() + name[1:] if name.islower() else name)
     for it in list(known.values()) + list(fetched.values()):
         if it.get("actor"):
             it["actor"] = canon.get(norm(it["actor"]), it["actor"])
