@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-11-23T02:38:08Z",
+ "generated_at": "2026-11-23T12:18:48Z",
  "window": {
   "start": "2026-08-25",
   "end": "2026-11-22",
@@ -20,7 +20,7 @@
   },
   {
    "key": "churn",
-   "text": "6 groups posted only in the last 30 days (Vortex, Pixelleaks and Soul); Storm, killsec3 and Clop went quiet."
+   "text": "6 groups posted only in the last 30 days (Vortex, Pixelleaks and Soul); Storm, killsec3 and Zawoo went quiet."
   },
   {
    "key": "rhythm",
@@ -312,17 +312,6 @@
     "attack_url": null
    },
    {
-    "name": "Clop",
-    "periods": [
-     25,
-     1,
-     0
-    ],
-    "total": 26,
-    "attack_id": "S0611",
-    "attack_url": "https://attack.mitre.org/software/S0611"
-   },
-   {
     "name": "Zawoo",
     "periods": [
      22,
@@ -332,6 +321,17 @@
     "total": 26,
     "attack_id": null,
     "attack_url": null
+   },
+   {
+    "name": "Clop",
+    "periods": [
+     25,
+     1,
+     0
+    ],
+    "total": 26,
+    "attack_id": "S0611",
+    "attack_url": "https://attack.mitre.org/software/S0611"
    },
    {
     "name": "ShinyHunters",
