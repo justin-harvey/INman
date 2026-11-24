@@ -1,10 +1,10 @@
 {
- "updated_at": "2026-11-23T12:18:42+00:00",
+ "updated_at": "2026-11-24T00:18:37+00:00",
  "feeds": {
   "ransomware.live": "skipped (RL_ENABLED is not true; see README licensing note)",
   "sec_edgar": "error: RuntimeError: SEC refused the request (403): set the repository variable SEC_USER_AGENT to '<your organization> <contact email>'",
   "hhs_ocr": "ok (0 in the last 60 days; first page only (0 rows; table controls not found))",
-  "ransomwatch": "ok, 4573 posts in window",
+  "ransomwatch": "ok, 4555 posts in window",
   "overrides": "0 applied"
  },
  "total": 187,
