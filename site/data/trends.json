@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-11-24T00:18:56Z",
+ "generated_at": "2026-11-24T10:23:31Z",
  "window": {
   "start": "2026-08-26",
   "end": "2026-11-23",
@@ -16,11 +16,11 @@
   },
   {
    "key": "rising",
-   "text": "Climbing: Booba team (8 \u2192 32); INC Ransom (41 \u2192 65); Safepay (20 \u2192 38); Rhysida (12 \u2192 30)."
+   "text": "Climbing: INC Ransom (41 \u2192 65); Booba team (8 \u2192 32); Rhysida (12 \u2192 30); Safepay (20 \u2192 38)."
   },
   {
    "key": "churn",
-   "text": "6 groups posted only in the last 30 days (Vortex, Pixelleaks and Soul); Storm, killsec3 and Zawoo went quiet."
+   "text": "6 groups posted only in the last 30 days (Vortex, Pixelleaks and Soul); Storm, killsec3 and Clop went quiet."
   },
   {
    "key": "rhythm",
@@ -176,17 +176,6 @@
   ],
   "rising": [
    {
-    "name": "Booba team",
-    "periods": [
-     8,
-     13,
-     32
-    ],
-    "total": 53,
-    "attack_id": null,
-    "attack_url": null
-   },
-   {
     "name": "INC Ransom",
     "periods": [
      41,
@@ -198,13 +187,13 @@
     "attack_url": "https://attack.mitre.org/groups/G1032"
    },
    {
-    "name": "Safepay",
+    "name": "Booba team",
     "periods": [
-     20,
-     25,
-     38
+     8,
+     13,
+     32
     ],
-    "total": 83,
+    "total": 53,
     "attack_id": null,
     "attack_url": null
    },
@@ -216,6 +205,17 @@
      30
     ],
     "total": 56,
+    "attack_id": null,
+    "attack_url": null
+   },
+   {
+    "name": "Safepay",
+    "periods": [
+     20,
+     25,
+     38
+    ],
+    "total": 83,
     "attack_id": null,
     "attack_url": null
    }
@@ -312,17 +312,6 @@
     "attack_url": null
    },
    {
-    "name": "Zawoo",
-    "periods": [
-     26,
-     0,
-     0
-    ],
-    "total": 26,
-    "attack_id": null,
-    "attack_url": null
-   },
-   {
     "name": "Clop",
     "periods": [
      25,
@@ -332,6 +321,17 @@
     "total": 26,
     "attack_id": "S0611",
     "attack_url": "https://attack.mitre.org/software/S0611"
+   },
+   {
+    "name": "Zawoo",
+    "periods": [
+     26,
+     0,
+     0
+    ],
+    "total": 26,
+    "attack_id": null,
+    "attack_url": null
    },
    {
     "name": "ShinyHunters",
