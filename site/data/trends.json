@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-11-24T10:23:31Z",
+ "generated_at": "2026-11-24T20:52:08Z",
  "window": {
   "start": "2026-08-26",
   "end": "2026-11-23",
@@ -8,11 +8,11 @@
  "findings": [
   {
    "key": "growth",
-   "text": "Extortion claims went 963 \u2192 1,117 \u2192 1,321 per 30 days (+37%). Most of the rise is one group, n0n (9 \u2192 148 \u2192 267); without it, growth is +10%."
+   "text": "Extortion claims went 963 \u2192 1,117 \u2192 1,322 per 30 days (+37%). Most of the rise is one group, n0n (9 \u2192 148 \u2192 267); without it, growth is +11%."
   },
   {
    "key": "concentration",
-   "text": "The top 5 groups post 39% of claims and the top 10 post 50%, out of 121 active groups. The Gentlemen and Qilin are the steady leaders (The Gentlemen 103 \u2192 124 \u2192 137, Qilin 104 \u2192 100 \u2192 86)."
+   "text": "The top 5 groups post 39% of claims and the top 10 post 50%, out of 122 active groups. The Gentlemen and Qilin are the steady leaders (The Gentlemen 103 \u2192 124 \u2192 137, Qilin 104 \u2192 100 \u2192 86)."
   },
   {
    "key": "rising",
@@ -28,7 +28,7 @@
   },
   {
    "key": "vulns",
-   "text": "CISA added about 9 exploited vulnerabilities a week (steady); new high and critical CVEs ran about 118 a week (slowing)."
+   "text": "CISA added about 9 exploited vulnerabilities a week (steady); new high and critical CVEs ran about 119 a week (slowing)."
   },
   {
    "key": "epss",
@@ -48,12 +48,12 @@
   }
  ],
  "claims": {
-  "total": 3401,
+  "total": 3402,
   "period_days": 30,
   "periods": [
    963,
    1117,
-   1321
+   1322
   ],
   "change_pct": 37,
   "surger": {
@@ -70,9 +70,9 @@
   "periods_ex_surger": [
    954,
    969,
-   1054
+   1055
   ],
-  "change_pct_ex_surger": 10,
+  "change_pct_ex_surger": 11,
   "surger_peaks": [
    {
     "date": "2026-11-09",
@@ -110,7 +110,7 @@
     240,
     331,
     340,
-    314
+    315
    ],
    "ex_surger": [
     189,
@@ -124,7 +124,7 @@
     231,
     221,
     260,
-    253
+    254
    ]
   },
   "weekday_avg": {
@@ -138,7 +138,7 @@
   },
   "top5_share": 39,
   "top10_share": 50,
-  "groups_active": 121,
+  "groups_active": 122,
   "steady": [
    {
     "name": "The Gentlemen",
@@ -334,17 +334,6 @@
     "attack_url": null
    },
    {
-    "name": "ShinyHunters",
-    "periods": [
-     16,
-     5,
-     0
-    ],
-    "total": 21,
-    "attack_id": "G1057",
-    "attack_url": "https://attack.mitre.org/groups/G1057"
-   },
-   {
     "name": "Lamashtu",
     "periods": [
      0,
@@ -354,6 +343,17 @@
     "total": 21,
     "attack_id": null,
     "attack_url": null
+   },
+   {
+    "name": "ShinyHunters",
+    "periods": [
+     16,
+     5,
+     0
+    ],
+    "total": 21,
+    "attack_id": "G1057",
+    "attack_url": "https://attack.mitre.org/groups/G1057"
    }
   ]
  },
@@ -380,10 +380,10 @@
    ]
   },
   "cve": {
-   "total": 1461,
-   "per_week": 118.5,
+   "total": 1464,
+   "per_week": 118.8,
    "first_half": 802,
-   "second_half": 620,
+   "second_half": 623,
    "direction": "falling",
    "weekly": [
     117,
@@ -397,7 +397,7 @@
     62,
     61,
     84,
-    213
+    216
    ]
   },
   "epss": {
