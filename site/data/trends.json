@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-11-25T04:07:08Z",
+ "generated_at": "2026-11-25T14:18:07Z",
  "window": {
   "start": "2026-08-27",
   "end": "2026-11-24",
@@ -8,11 +8,11 @@
  "findings": [
   {
    "key": "growth",
-   "text": "Extortion claims went 939 \u2192 1,126 \u2192 1,337 per 30 days (+42%). Most of the rise is one group, n0n (9 \u2192 154 \u2192 261); without it, growth is +16%."
+   "text": "Extortion claims went 939 \u2192 1,126 \u2192 1,339 per 30 days (+43%). Most of the rise is one group, n0n (9 \u2192 154 \u2192 261); without it, growth is +16%."
   },
   {
    "key": "concentration",
-   "text": "The top 5 groups post 38% of claims and the top 10 post 49%, out of 120 active groups. The Gentlemen and Qilin are the steady leaders (The Gentlemen 99 \u2192 123 \u2192 137, Qilin 96 \u2192 104 \u2192 84)."
+   "text": "The top 5 groups post 38% of claims and the top 10 post 49%, out of 121 active groups. The Gentlemen and Qilin are the steady leaders (The Gentlemen 99 \u2192 123 \u2192 137, Qilin 96 \u2192 104 \u2192 84)."
   },
   {
    "key": "rising",
@@ -32,7 +32,7 @@
   },
   {
    "key": "epss",
-   "text": "At least 16 new high and critical CVEs (1%) have a 10% or higher chance of being exploited within 30 days, by FIRST's EPSS score. Highest now: CVE-2026-109618 (100%, on CISA list), CVE-2026-109619 (100%, on CISA list), CVE-2026-111497 (100%, on CISA list)."
+   "text": "At least 16 new high and critical CVEs (1%) have a 10% or higher chance of being exploited within 30 days, by FIRST's EPSS score. Highest now: CVE-2026-111497 (100%, on CISA list), CVE-2026-123158 (96%, on CISA list), CVE-2026-40217 (83%, on CISA list)."
   },
   {
    "key": "sectors",
@@ -48,14 +48,14 @@
   }
  ],
  "claims": {
-  "total": 3402,
+  "total": 3404,
   "period_days": 30,
   "periods": [
    939,
    1126,
-   1337
+   1339
   ],
-  "change_pct": 42,
+  "change_pct": 43,
   "surger": {
    "name": "n0n",
    "periods": [
@@ -70,7 +70,7 @@
   "periods_ex_surger": [
    930,
    972,
-   1076
+   1078
   ],
   "change_pct_ex_surger": 16,
   "surger_peaks": [
@@ -110,7 +110,7 @@
     219,
     393,
     300,
-    307
+    309
    ],
    "ex_surger": [
     173,
@@ -124,21 +124,21 @@
     201,
     291,
     221,
-    247
+    249
    ]
   },
   "weekday_avg": {
-   "Monday": 67.6,
+   "Monday": 67.7,
    "Tuesday": 43.5,
    "Wednesday": 44.8,
    "Thursday": 29.2,
    "Friday": 34.8,
-   "Saturday": 24.3,
+   "Saturday": 24.4,
    "Sunday": 20.9
   },
   "top5_share": 38,
   "top10_share": 49,
-  "groups_active": 120,
+  "groups_active": 121,
   "steady": [
    {
     "name": "The Gentlemen",
@@ -334,17 +334,6 @@
     "attack_url": "https://attack.mitre.org/software/S0611"
    },
    {
-    "name": "Lamashtu",
-    "periods": [
-     0,
-     21,
-     0
-    ],
-    "total": 21,
-    "attack_id": null,
-    "attack_url": null
-   },
-   {
     "name": "ShinyHunters",
     "periods": [
      16,
@@ -354,6 +343,17 @@
     "total": 21,
     "attack_id": "G1057",
     "attack_url": "https://attack.mitre.org/groups/G1057"
+   },
+   {
+    "name": "Lamashtu",
+    "periods": [
+     0,
+     21,
+     0
+    ],
+    "total": 21,
+    "attack_id": null,
+    "attack_url": null
    }
   ]
  },
@@ -406,22 +406,6 @@
    "share_pct": 1.0,
    "top": [
     {
-     "cve": "CVE-2026-109618",
-     "epss": 0.99999,
-     "pct": 1.0,
-     "url": "https://nvd.nist.gov/vuln/detail/CVE-2026-109618",
-     "kev": true,
-     "title": "CVE-2026-109618 \u00b7 PHP Group PHP: PHP Memory Corruption Vulnerability"
-    },
-    {
-     "cve": "CVE-2026-109619",
-     "epss": 0.99999,
-     "pct": 1.0,
-     "url": "https://nvd.nist.gov/vuln/detail/CVE-2026-109619",
-     "kev": true,
-     "title": "CVE-2026-109619 \u00b7 PHP Group PHP: PHP Stale Internal Request-State Vulnerability"
-    },
-    {
      "cve": "CVE-2026-111497",
      "epss": 0.99987,
      "pct": 0.9998,
@@ -452,6 +436,22 @@
      "url": "https://nvd.nist.gov/vuln/detail/CVE-2026-48356",
      "kev": true,
      "title": "CVE-2026-48356 \u00b7 Adobe Commerce and Magento: Adobe Commerce and Magento Unrestricted Upload of File with Dangerous Type Vulnerability"
+    },
+    {
+     "cve": "CVE-2026-116606",
+     "epss": 0.7452,
+     "pct": 0.995,
+     "url": "https://nvd.nist.gov/vuln/detail/CVE-2026-116606",
+     "kev": true,
+     "title": "CVE-2026-116606 (9.8): An authentication bypass in Barracuda Email Security Gateway versions earlier than 9.4.0.030 allows an unauthenticated remote attacker to invoke a configurat"
+    },
+    {
+     "cve": "CVE-2026-97229",
+     "epss": 0.74315,
+     "pct": 0.9949,
+     "url": "https://nvd.nist.gov/vuln/detail/CVE-2026-97229",
+     "kev": true,
+     "title": "CVE-2026-97229 \u00b7 GitLab Community Edition and Enterprise Edition: GitLab Community Edition and Enterprise Edition Integer Overflow or Wraparound Vulnerability"
     }
    ]
   }
