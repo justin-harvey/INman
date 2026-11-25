@@ -1,26 +1,26 @@
 {
- "generated_at": "2026-11-24T20:52:08Z",
+ "generated_at": "2026-11-25T04:07:08Z",
  "window": {
-  "start": "2026-08-26",
-  "end": "2026-11-23",
+  "start": "2026-08-27",
+  "end": "2026-11-24",
   "days": 90
  },
  "findings": [
   {
    "key": "growth",
-   "text": "Extortion claims went 963 \u2192 1,117 \u2192 1,322 per 30 days (+37%). Most of the rise is one group, n0n (9 \u2192 148 \u2192 267); without it, growth is +11%."
+   "text": "Extortion claims went 939 \u2192 1,126 \u2192 1,337 per 30 days (+42%). Most of the rise is one group, n0n (9 \u2192 154 \u2192 261); without it, growth is +16%."
   },
   {
    "key": "concentration",
-   "text": "The top 5 groups post 39% of claims and the top 10 post 50%, out of 122 active groups. The Gentlemen and Qilin are the steady leaders (The Gentlemen 103 \u2192 124 \u2192 137, Qilin 104 \u2192 100 \u2192 86)."
+   "text": "The top 5 groups post 38% of claims and the top 10 post 49%, out of 120 active groups. The Gentlemen and Qilin are the steady leaders (The Gentlemen 99 \u2192 123 \u2192 137, Qilin 96 \u2192 104 \u2192 84)."
   },
   {
    "key": "rising",
-   "text": "Climbing: INC Ransom (41 \u2192 65); Booba team (8 \u2192 32); Rhysida (12 \u2192 30); Safepay (20 \u2192 38)."
+   "text": "Climbing: INC Ransom (42 \u2192 67); Booba team (8 \u2192 32); Rhysida (12 \u2192 31); Safepay (20 \u2192 39)."
   },
   {
    "key": "churn",
-   "text": "6 groups posted only in the last 30 days (Vortex, Pixelleaks and Soul); Storm, killsec3 and Clop went quiet."
+   "text": "6 groups posted only in the last 30 days (Vortex, Pixelleaks and Soul); Storm, killsec3 and Zawoo went quiet."
   },
   {
    "key": "rhythm",
@@ -28,11 +28,11 @@
   },
   {
    "key": "vulns",
-   "text": "CISA added about 9 exploited vulnerabilities a week (steady); new high and critical CVEs ran about 119 a week (slowing)."
+   "text": "CISA added about 9 exploited vulnerabilities a week (steady); new high and critical CVEs ran about 124 a week (slowing)."
   },
   {
    "key": "epss",
-   "text": "At least 16 new high and critical CVEs (1.1%) have a 10% or higher chance of being exploited within 30 days, by FIRST's EPSS score. Highest now: CVE-2026-109618 (100%, on CISA list), CVE-2026-109619 (100%, on CISA list), CVE-2026-111497 (100%, on CISA list)."
+   "text": "At least 16 new high and critical CVEs (1%) have a 10% or higher chance of being exploited within 30 days, by FIRST's EPSS score. Highest now: CVE-2026-109618 (100%, on CISA list), CVE-2026-109619 (100%, on CISA list), CVE-2026-111497 (100%, on CISA list)."
   },
   {
    "key": "sectors",
@@ -51,28 +51,28 @@
   "total": 3402,
   "period_days": 30,
   "periods": [
-   963,
-   1117,
-   1322
+   939,
+   1126,
+   1337
   ],
-  "change_pct": 37,
+  "change_pct": 42,
   "surger": {
    "name": "n0n",
    "periods": [
     9,
-    148,
-    267
+    154,
+    261
    ],
    "total": 424,
    "attack_id": null,
    "attack_url": null
   },
   "periods_ex_surger": [
-   954,
-   969,
-   1055
+   930,
+   972,
+   1076
   ],
-  "change_pct_ex_surger": 11,
+  "change_pct_ex_surger": 16,
   "surger_peaks": [
    {
     "date": "2026-11-09",
@@ -85,91 +85,91 @@
   ],
   "weekly": {
    "week_ending": [
-    "2026-09-07",
-    "2026-09-14",
-    "2026-09-21",
-    "2026-09-28",
-    "2026-10-05",
-    "2026-10-12",
-    "2026-10-19",
-    "2026-10-26",
-    "2026-11-02",
-    "2026-11-09",
-    "2026-11-16",
-    "2026-11-23"
+    "2026-09-08",
+    "2026-09-15",
+    "2026-09-22",
+    "2026-09-29",
+    "2026-10-06",
+    "2026-10-13",
+    "2026-10-20",
+    "2026-10-27",
+    "2026-11-03",
+    "2026-11-10",
+    "2026-11-17",
+    "2026-11-24"
    ],
    "all": [
-    189,
-    224,
-    191,
-    273,
+    173,
+    237,
+    181,
+    305,
+    208,
+    291,
+    241,
+    297,
     219,
-    278,
-    263,
-    285,
-    240,
-    331,
-    340,
-    315
+    393,
+    300,
+    307
    ],
    "ex_surger": [
-    189,
-    224,
-    182,
-    268,
-    213,
-    225,
-    211,
-    246,
-    231,
+    173,
+    237,
+    172,
+    299,
+    203,
+    233,
+    187,
+    264,
+    201,
+    291,
     221,
-    260,
-    254
+    247
    ]
   },
   "weekday_avg": {
    "Monday": 67.6,
-   "Tuesday": 43.7,
-   "Wednesday": 44.5,
+   "Tuesday": 43.5,
+   "Wednesday": 44.8,
    "Thursday": 29.2,
    "Friday": 34.8,
    "Saturday": 24.3,
    "Sunday": 20.9
   },
-  "top5_share": 39,
-  "top10_share": 50,
-  "groups_active": 122,
+  "top5_share": 38,
+  "top10_share": 49,
+  "groups_active": 120,
   "steady": [
    {
     "name": "The Gentlemen",
     "periods": [
-     103,
-     124,
+     99,
+     123,
      137
     ],
-    "total": 364,
+    "total": 359,
     "attack_id": "G1058",
     "attack_url": "https://attack.mitre.org/groups/G1058"
    },
    {
     "name": "Qilin",
     "periods": [
+     96,
      104,
-     100,
-     86
+     84
     ],
-    "total": 290,
+    "total": 284,
     "attack_id": "S1242",
     "attack_url": "https://attack.mitre.org/software/S1242"
    },
    {
     "name": "Akira",
     "periods": [
-     46,
+     43,
      30,
      33
     ],
-    "total": 109,
+    "total": 106,
     "attack_id": "G1024",
     "attack_url": "https://attack.mitre.org/groups/G1024"
    }
@@ -178,11 +178,11 @@
    {
     "name": "INC Ransom",
     "periods": [
-     41,
-     33,
-     65
+     42,
+     32,
+     67
     ],
-    "total": 139,
+    "total": 141,
     "attack_id": "G1032",
     "attack_url": "https://attack.mitre.org/groups/G1032"
    },
@@ -202,9 +202,9 @@
     "periods": [
      12,
      14,
-     30
+     31
     ],
-    "total": 56,
+    "total": 57,
     "attack_id": null,
     "attack_url": null
    },
@@ -213,9 +213,9 @@
     "periods": [
      20,
      25,
-     38
+     39
     ],
-    "total": 83,
+    "total": 84,
     "attack_id": null,
     "attack_url": null
    }
@@ -237,9 +237,9 @@
     "periods": [
      0,
      0,
-     38
+     41
     ],
-    "total": 38,
+    "total": 41,
     "attack_id": null,
     "attack_url": null
    },
@@ -248,9 +248,9 @@
     "periods": [
      0,
      0,
-     28
+     29
     ],
-    "total": 28,
+    "total": 29,
     "attack_id": null,
     "attack_url": null
    },
@@ -270,9 +270,9 @@
     "periods": [
      0,
      0,
-     17
+     18
     ],
-    "total": 17,
+    "total": 18,
     "attack_id": null,
     "attack_url": null
    },
@@ -312,17 +312,6 @@
     "attack_url": null
    },
    {
-    "name": "Clop",
-    "periods": [
-     25,
-     1,
-     0
-    ],
-    "total": 26,
-    "attack_id": "S0611",
-    "attack_url": "https://attack.mitre.org/software/S0611"
-   },
-   {
     "name": "Zawoo",
     "periods": [
      26,
@@ -332,6 +321,17 @@
     "total": 26,
     "attack_id": null,
     "attack_url": null
+   },
+   {
+    "name": "Clop",
+    "periods": [
+     25,
+     1,
+     0
+    ],
+    "total": 26,
+    "attack_id": "S0611",
+    "attack_url": "https://attack.mitre.org/software/S0611"
    },
    {
     "name": "Lamashtu",
@@ -359,51 +359,51 @@
  },
  "vulns": {
   "kev": {
-   "total": 116,
-   "per_week": 8.8,
-   "first_half": 52,
-   "second_half": 53,
+   "total": 113,
+   "per_week": 9.0,
+   "first_half": 54,
+   "second_half": 54,
    "direction": "flat",
    "weekly": [
-    8,
-    15,
-    7,
+    12,
     11,
-    6,
+    11,
+    8,
     5,
-    9,
-    10,
-    8,
     7,
-    8,
-    11
+    13,
+    6,
+    7,
+    12,
+    3,
+    13
    ]
   },
   "cve": {
-   "total": 1464,
-   "per_week": 118.8,
-   "first_half": 802,
-   "second_half": 623,
+   "total": 1532,
+   "per_week": 123.8,
+   "first_half": 819,
+   "second_half": 666,
    "direction": "falling",
    "weekly": [
-    117,
-    169,
-    96,
-    158,
-    100,
-    162,
-    106,
-    94,
-    62,
+    179,
+    112,
+    114,
+    141,
+    118,
+    155,
+    90,
+    79,
     61,
-    84,
-    216
+    129,
+    13,
+    294
    ]
   },
   "epss": {
    "threshold": 0.1,
    "likely": 16,
-   "share_pct": 1.1,
+   "share_pct": 1.0,
    "top": [
     {
      "cve": "CVE-2026-109618",
@@ -423,8 +423,8 @@
     },
     {
      "cve": "CVE-2026-111497",
-     "epss": 0.99931,
-     "pct": 0.9997,
+     "epss": 0.99987,
+     "pct": 0.9998,
      "url": "https://nvd.nist.gov/vuln/detail/CVE-2026-111497",
      "kev": true,
      "title": "CVE-2026-111497 \u00b7 Google Brotli: Google Brotli Unchecked Return Value Vulnerability"
@@ -440,7 +440,7 @@
     {
      "cve": "CVE-2026-40217",
      "epss": 0.82799,
-     "pct": 0.9968,
+     "pct": 0.9967,
      "url": "https://nvd.nist.gov/vuln/detail/CVE-2026-40217",
      "kev": true,
      "title": "CVE-2026-40217 \u00b7 BerriAI LiteLLM: BerriAI LiteLLM Unprotected Alternate Channel Vulnerability"
