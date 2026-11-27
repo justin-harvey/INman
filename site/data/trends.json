@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-11-27T09:02:04Z",
+ "generated_at": "2026-11-27T18:53:13Z",
  "window": {
   "start": "2026-08-29",
   "end": "2026-11-26",
@@ -16,11 +16,11 @@
   },
   {
    "key": "rising",
-   "text": "Climbing: INC Ransom (39 \u2192 69); Rhysida (10 \u2192 34); Leakeddata (17 \u2192 41); Aurora (6 \u2192 23)."
+   "text": "Climbing: INC Ransom (39 \u2192 69); Leakeddata (17 \u2192 41); Rhysida (10 \u2192 34); Aurora (6 \u2192 23)."
   },
   {
    "key": "churn",
-   "text": "6 groups posted only in the last 30 days (Pixelleaks, Vortex and Soul); Storm, killsec3 and Clop went quiet."
+   "text": "6 groups posted only in the last 30 days (Pixelleaks, Vortex and Soul); Storm, killsec3 and Zawoo went quiet."
   },
   {
    "key": "rhythm",
@@ -32,7 +32,7 @@
   },
   {
    "key": "epss",
-   "text": "At least 10 new high and critical CVEs (0.6%) have a 10% or higher chance of being exploited within 30 days, by FIRST's EPSS score. Highest now: CVE-2026-97229 (74%, on CISA list), CVE-2026-116779 (44%, on CISA list), CVE-2026-133469 (32%, on CISA list)."
+   "text": "At least 11 new high and critical CVEs (0.6%) have a 10% or higher chance of being exploited within 30 days, by FIRST's EPSS score. Highest now: CVE-2026-97229 (74%, on CISA list), CVE-2026-116779 (44%, on CISA list), CVE-2026-133469 (32%, on CISA list)."
   },
   {
    "key": "sectors",
@@ -187,17 +187,6 @@
     "attack_url": "https://attack.mitre.org/groups/G1032"
    },
    {
-    "name": "Rhysida",
-    "periods": [
-     10,
-     16,
-     34
-    ],
-    "total": 60,
-    "attack_id": null,
-    "attack_url": null
-   },
-   {
     "name": "Leakeddata",
     "periods": [
      17,
@@ -205,6 +194,17 @@
      41
     ],
     "total": 78,
+    "attack_id": null,
+    "attack_url": null
+   },
+   {
+    "name": "Rhysida",
+    "periods": [
+     10,
+     16,
+     34
+    ],
+    "total": 60,
     "attack_id": null,
     "attack_url": null
    },
@@ -312,6 +312,17 @@
     "attack_url": null
    },
    {
+    "name": "Zawoo",
+    "periods": [
+     26,
+     0,
+     0
+    ],
+    "total": 26,
+    "attack_id": null,
+    "attack_url": null
+   },
+   {
     "name": "Clop",
     "periods": [
      25,
@@ -323,13 +334,13 @@
     "attack_url": "https://attack.mitre.org/software/S0611"
    },
    {
-    "name": "Zawoo",
+    "name": "Lamashtu",
     "periods": [
-     26,
      0,
+     21,
      0
     ],
-    "total": 26,
+    "total": 21,
     "attack_id": null,
     "attack_url": null
    },
@@ -343,17 +354,6 @@
     "total": 21,
     "attack_id": "G1057",
     "attack_url": "https://attack.mitre.org/groups/G1057"
-   },
-   {
-    "name": "Lamashtu",
-    "periods": [
-     0,
-     21,
-     0
-    ],
-    "total": 21,
-    "attack_id": null,
-    "attack_url": null
    }
   ]
  },
@@ -380,10 +380,10 @@
    ]
   },
   "cve": {
-   "total": 1701,
-   "per_week": 136.2,
+   "total": 1702,
+   "per_week": 136.3,
    "first_half": 807,
-   "second_half": 828,
+   "second_half": 829,
    "direction": "flat",
    "weekly": [
     186,
@@ -397,12 +397,12 @@
     56,
     114,
     49,
-    452
+    453
    ]
   },
   "epss": {
    "threshold": 0.1,
-   "likely": 10,
+   "likely": 11,
    "share_pct": 0.6,
    "top": [
     {
