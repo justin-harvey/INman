@@ -2,9 +2,9 @@
  "label": "Global leak-site posts per day (all countries)",
  "source": "RansomLook (CC BY 4.0)",
  "source_url": "https://www.ransomlook.io/",
- "latest_post_date": "2026-11-27",
+ "latest_post_date": "2026-11-28",
  "by_day": {
-  "2026-07-31": 61,
+  "2026-07-31": 58,
   "2026-08-01": 1,
   "2026-08-02": 36,
   "2026-08-03": 14,
@@ -123,6 +123,7 @@
   "2026-11-24": 41,
   "2026-11-25": 94,
   "2026-11-26": 34,
-  "2026-11-27": 27
+  "2026-11-27": 27,
+  "2026-11-28": 1
  }
 }

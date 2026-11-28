@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-11-28T01:55:08Z",
+ "generated_at": "2026-11-28T10:16:43Z",
  "window": {
   "start": "2026-08-30",
   "end": "2026-11-27",
@@ -16,7 +16,7 @@
   },
   {
    "key": "rising",
-   "text": "Climbing: INC Ransom (40 \u2192 72); Rhysida (10 \u2192 32); Leakeddata (18 \u2192 36); Booba team (8 \u2192 23)."
+   "text": "Climbing: INC Ransom (40 \u2192 72); Rhysida (10 \u2192 32); Leakeddata (18 \u2192 36); Aurora (6 \u2192 21)."
   },
   {
    "key": "churn",
@@ -209,13 +209,13 @@
     "attack_url": null
    },
    {
-    "name": "Booba team",
+    "name": "Aurora",
     "periods": [
-     8,
-     22,
-     23
+     6,
+     16,
+     21
     ],
-    "total": 53,
+    "total": 43,
     "attack_id": null,
     "attack_url": null
    }
